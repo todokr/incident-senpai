@@ -1,0 +1,193 @@
+---
+version: 1
+incident_response:
+  slack:
+    base_channel_id: YOUR_SLACK_CHANNEL_ID
+    channel_prefix: incident
+  zoom:
+    url: https://zoom.us/j/123456789
+  triage_levels:
+    emergency:
+      label: ":fire: サービスに影響が出ており、緊急の対応が必要"
+    investigate:
+      label: ":male-detective: サービスへの影響は不明で、調査が必要"
+    maintain:
+      label: ":relieved: サービスへの影響はなし（予防措置をとる）"
+  incident_levels:
+    disaster:
+      label: Disaster
+    severe:
+      label: Severe
+    hard:
+      label: Hard
+    minor:
+      label: Minor
+    under-minor:
+      label: Minor未満
+  roles:
+    commander:
+      label: 指揮者
+      description: 障害対応の舵取りを行う
+      message: あわてず落ち着いて関係者と対応を進めましょう。まずは各ロールのアサインを行ってください。
+    communication-lead:
+      label: CL
+      description: 障害対応コミュニケーションを取りまとめる
+      message: コミュニケーションを取りまとめてください。
+    effect-investigator:
+      label: 影響調査
+      description: サービスの影響範囲の調査を行う
+      message: 影響範囲の調査を開始し、5分おきに状況を共有してください。
+    cause-investigator:
+      label: 原因調査
+      description: 障害の原因調査を行う
+      message: 原因を調査し、判明したことを都度このチャンネルに報告してください。
+  recipients:
+    executives:
+      label: 偉い人たち
+      ids:
+      - U05EPR2BSHM
+    managers_a:
+      label: A部署マネージャー
+      ids:
+      - U05EXMHG094
+    developers_a:
+      label: A部署開発者
+      ids:
+      - U05EPR1TN15
+      - U05EXMHCTNJ
+    managers_b:
+      label: B部署マネージャー
+      ids:
+      - U05EXMHG094
+    developers_b:
+      label: B部署開発者
+      ids:
+      - U05EPR1TN15
+      - U05EXMHCTNJ
+  services:
+    auth-service:
+      label: 認証サービス（A部署担当）
+    payment-service:
+      label: 決済サービス（A部署担当）
+    billing-service:
+      label: 請求サービス（B部署担当）
+    shipping-service:
+      label: 配送サービス（B部署担当）
+    all-services:
+      label: 全サービス
+  notification_policies:
+  - label: "[緊急] 認証, 決済"
+    recipients:
+    - executives
+    - managers_a
+    - developers_a
+    conditions:
+    - property: triage_levels
+      anyOf:
+      - emergency
+    - property: services
+      anyOf:
+      - auth-service
+      - payment-service
+  - label: "[調査] 認証, 決済"
+    recipients:
+    - managers_a
+    - developers_a
+    conditions:
+    - property: triage_levels
+      anyOf:
+      - investigate
+    - property: services
+      anyOf:
+      - auth-service
+      - payment-service
+  - label: "[予防措置] 認証, 決済"
+    recipients:
+    - developers_a
+    conditions:
+    - property: triage_levels
+      anyOf:
+      - maintain
+    - property: services
+      anyOf:
+      - auth-service
+      - payment-service
+  - label: "[緊急] 請求, 配送"
+    recipients:
+    - executives
+    - managers_b
+    - developers_b
+    conditions:
+    - property: triage_levels
+      anyOf:
+      - emergency
+    - property: services
+      anyOf:
+      - billing-service
+      - shipping-service
+  - label: "[調査] 請求, 配送"
+    recipients:
+    - managers_b
+    - developers_b
+    conditions:
+    - property: triage_levels
+      anyOf:
+      - investigate
+    - property: services
+      anyOf:
+      - billing-service
+      - shipping-service
+  - label: "[予防措置] 請求, 配送"
+    recipients:
+    - developers_b
+    conditions:
+    - property: triage_levels
+      anyOf:
+      - maintain
+    - property: services
+      anyOf:
+      - billing-service
+      - shipping-service
+  - label: "[緊急] 全サービス"
+    recipients:
+    - executives
+    - managers_a
+    - managers_b
+    - developers_a
+    - developers_b
+    conditions:
+    - property: triage_levels
+      anyOf:
+      - emergency
+    - property: services
+      anyOf:
+      - all-services
+  - label: "[調査] 全サービス"
+    recipients:
+    - managers_a
+    - managers_b
+    - developers_a
+    - developers_b
+    conditions:
+    - property: triage_levels
+      anyOf:
+      - investigate
+    - property: services
+      anyOf:
+      - all-services
+  - label: "[予防措置] 全サービス"
+    recipients:
+    - developers_a
+    - developers_b
+    conditions:
+    - property: triage_levels
+      anyOf:
+      - maintain
+    - property: services
+      anyOf:
+      - all-services
+  default_notification_policy:
+    label: "デフォルト通知ポリシー"
+    recipients:
+    - developers_a
+    - developers_b

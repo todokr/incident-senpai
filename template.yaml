@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  incident-senpai
+
+Parameters:
+  SlackBotToken:
+    Type: String
+    Description: Your Slack Bot Token
+  SlackSigningSecret:
+    Type: String
+    Description: Your Slack Signing Secret
+  Architecture:
+    Type: String
+    Description: Lambda Runtime Architecture
+    Default: x86_64
+    AllowedValues:
+      - x86_64
+      - arm64
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Architectures:
+      - !Ref Architecture
+    Layers:
+      - !Ref ConfigLayer
+    Environment:
+      Variables:
+        SLACK_BOT_TOKEN: !Ref SlackBotToken
+        SLACK_SIGNING_SECRET: !Ref SlackSigningSecret
+
+Resources:
+  BotFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      MemorySize: 256
+      Timeout: 3
+      CodeUri: bot-function/
+      Handler: app.lambdaHandler
+      FunctionUrlConfig:
+        AuthType: NONE
+      Environment:
+        Variables:
+          ASYNC_TASK_QUEUE_URL: !GetAtt AsyncTaskQueue.QueueUrl
+      Role: !GetAtt BotFunctionRole.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: false
+        EntryPoints:
+        - app.ts
+
+  BotFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: lambda.amazonaws.com
+      Policies:
+        - PolicyName: "incident-senpai-bot-function-policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - sqs:SendMessage
+                Resource: !GetAtt AsyncTaskQueue.Arn
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  AsyncFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      MemorySize: 128
+      Timeout: 30
+      CodeUri: async-function/
+      Handler: app.lambdaHandler
+      Events:
+        AsyncEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt AsyncTaskQueue.Arn
+            BatchSize: 10
+            Enabled: true
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: false
+        EntryPoints:
+        - app.ts
+
+  AsyncTaskQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: incident-senpai-async-task-queue
+
+  ConfigLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: incident-senpai-config
+      Description: incident-senpai config layer
+      ContentUri: layers/
+      CompatibleArchitectures:
+        - x86_64
+        - arm64
+      CompatibleRuntimes:
+        - nodejs18.x
+      RetentionPolicy: Retain
+    Metadata:
+      BuildMethod: makefile
+Outputs:
+  BotFunction:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt BotFunction.Arn
+  BotFunctionUrl:
+    Description: "Lambda Function URL"
+    Value: !GetAtt BotFunctionUrl.FunctionUrl
