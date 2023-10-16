@@ -39,11 +39,11 @@ TODO
 
 ## スクリーンショット
 
-| スクリーンショット
+| 機能 | スクリーンショット|
 |:---|:---:|
-| **インシデント疑義の報告** | ![インシデントの報告](https://github.com/todokr/incident-senpai/assets/2328540/ea5fea7d-6e9b-4d88-a21f-f388729ea00d) |
-| **インシデント対応の開始** | ![warroom](https://github.com/todokr/incident-senpai/assets/2328540/5a02bf37-50e6-47e3-a1b4-5019ecbdbfe9) |
-| **ベースチャンネルへのブロードキャスト** | ![basechannel](https://github.com/todokr/incident-senpai/assets/2328540/4c8bb649-c29f-4fe3-a61b-b114ef650a08) |
-| **インシデントタイムラインのエクスポート** | ![followup](https://github.com/todokr/incident-senpai/assets/2328540/0668f9a9-cbc1-4950-8935-084f4293a53b) |
+| **インシデント疑義の報告** | ![報告モーダル](https://github.com/todokr/incident-senpai/assets/2328540/ea5fea7d-6e9b-4d88-a21f-f388729ea00d) |
+| **インシデント対応の開始** | ![対応チャンネル](https://github.com/todokr/incident-senpai/assets/2328540/5a02bf37-50e6-47e3-a1b4-5019ecbdbfe9) |
+| **ベースチャンネルへのブロードキャスト** | ![ベースチャンネル](https://github.com/todokr/incident-senpai/assets/2328540/4c8bb649-c29f-4fe3-a61b-b114ef650a08) |
+| **インシデントタイムラインのエクスポート** | ![エクスポートされたタイムライン](https://github.com/todokr/incident-senpai/assets/2328540/0668f9a9-cbc1-4950-8935-084f4293a53b) |
 
 
