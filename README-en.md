@@ -14,6 +14,15 @@ Incident Senpai is a Slack bot that helps organize incident response flow.
 - AWS SAM based deployment
 - No datastore required
 
+Multilingual support for messages posted to Slack is not supported. But feel free to create an issue if you need it!
+
+| Feature | Screenshot |
+|:---|:---:|
+| **Reporting** | ![reporting modal](https://github.com/todokr/incident-senpai/assets/2328540/8e222153-5a14-4e16-9f90-2369901f76c1) |
+| **Start response** | ![warroom](https://github.com/todokr/incident-senpai/assets/2328540/aebf3c61-a3a6-483e-8171-fc98e90da15f) |
+| **Broadcast to base channel** | ![basechannel](https://github.com/todokr/incident-senpai/assets/2328540/05c1c6c5-280e-4ea0-b1bc-563b43e69673) |
+| **Export timeline** | ![followup](https://github.com/todokr/incident-senpai/assets/2328540/f2186082-8ce7-4d55-9449-3e02ce74b833) |
+
 ## Deployment
 
 ### 1. Create config file
@@ -33,15 +42,4 @@ sam build -u && sam deploy --parameter-overrides Architecture=arm64 SlackBotToke
 
 ### 3. Setup bot
 TODO
-
-## Screenshot
-
-| **Feature** | **Screenshot** |
-|:---|:---:|
-| **Reporting incident** | ![Reporting incident](https://github.com/todokr/incident-senpai/assets/2328540/ea5fea7d-6e9b-4d88-a21f-f388729ea00d) |
-| **Starting incident respones at warroom slack channel** | ![warroom](https://github.com/todokr/incident-senpai/assets/2328540/5a02bf37-50e6-47e3-a1b4-5019ecbdbfe9) |
-| **Keep everyone on the same page** | ![basechannel](https://github.com/todokr/incident-senpai/assets/2328540/4c8bb649-c29f-4fe3-a61b-b114ef650a08) |
-| **Export incident timeline for postmortem** | ![followup](https://github.com/todokr/incident-senpai/assets/2328540/0668f9a9-cbc1-4950-8935-084f4293a53b) |
-
-
 
