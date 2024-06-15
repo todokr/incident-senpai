@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "node:fs";
 import { parse } from "yaml";
 
 export type Config = {
@@ -24,19 +24,20 @@ export function loadConfig(fileName: string): Config {
   const path = `/opt/${fileName}`;
   const loaded = parse(
     fs.readFileSync(path, { encoding: "utf-8" }),
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   ) as any;
   console.timeLog("loadConfig", "file loaded");
-  const ir = loaded["incident_response"];
+  const ir = loaded.incident_response;
   const incidentResponse = {
-    slackBaseChannelId: ir["slack"]["base_channel_id"],
-    channelPrefix: ir["slack"]["channel_prefix"],
-    triageLevels: ir["triage_levels"],
-    incidentLevels: ir["incident_levels"],
-    recipients: ir["recipients"],
-    services: ir["services"],
-    notificationPolicies: ir["notification_policies"],
-    defaultNotificationPolicy: ir["default_notification_policies"],
-    roles: ir["roles"],
+    slackBaseChannelId: ir.slack.base_channel_id,
+    channelPrefix: ir.slack.channel_prefix,
+    triageLevels: ir.triage_levels,
+    incidentLevels: ir.incident_levels,
+    recipients: ir.recipients,
+    services: ir.services,
+    notificationPolicies: ir.notification_policies,
+    defaultNotificationPolicy: ir.default_notification_policies,
+    roles: ir.roles,
   } as IncidentResponse;
 
   console.timeEnd("loadConfig");

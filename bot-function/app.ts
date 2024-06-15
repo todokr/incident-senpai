@@ -1,5 +1,5 @@
 import { App, AwsLambdaReceiver } from "@slack/bolt";
-import {
+import type {
   AwsCallback,
   AwsEvent,
   AwsResponse,
@@ -49,7 +49,7 @@ app.event("reaction_added", handler.processAsync);
 
 export const lambdaHandler = async (
   event: AwsEvent,
-  context: any,
+  context: unknown,
   callback: AwsCallback,
 ): Promise<AwsResponse> => {
   const handler = await receiver.start();

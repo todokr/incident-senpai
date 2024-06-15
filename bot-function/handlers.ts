@@ -1,5 +1,5 @@
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
-import {
+import type {
   AllMiddlewareArgs,
   BlockButtonAction,
   SlackActionMiddlewareArgs,
@@ -7,7 +7,7 @@ import {
   SlackEventMiddlewareArgs,
   SlackViewMiddlewareArgs,
 } from "@slack/bolt";
-import { Config } from "./config";
+import type { Config } from "./config";
 import { CallbackId } from "./consts";
 import {
   declareContainmentModal,
