@@ -1,22 +1,57 @@
+import { App, AwsLambdaReceiver } from "@slack/bolt";
 import {
-  APIGatewayProxyEventV2,
-  APIGatewayProxyResultV2,
-  Context,
-} from "https://deno.land/x/lambda@1.44.1/mod.ts";
+  AwsCallback,
+  AwsEvent,
+  AwsResponse,
+} from "@slack/bolt/dist/receivers/AwsLambdaReceiver";
+import { loadConfig } from "./config";
+import { ActionId, CallbackId, Command } from "./consts";
+import { Handler } from "./handlers";
 
-export async function handler(
-  event: APIGatewayProxyEventV2,
-  context: Context,
-): Promise<APIGatewayProxyResultV2> {
-  const chuckNorrisJoke = await fetch("https://api.chucknorris.io/jokes/random")
-    .then((res) => res.json());
-  const body = JSON.stringify({
-    denoVersion: Deno.version.deno,
-    joke: chuckNorrisJoke.value,
-  });
-  return {
-    headers: { "content-type": "text/html;charset=utf8" },
-    statusCode: 200,
-    body,
-  };
+const signingSecret = process.env.SLACK_SIGNING_SECRET;
+if (!signingSecret) {
+  throw new Error("SLACK_SIGNING_SECRET is not defined");
 }
+
+const token = process.env.SLACK_BOT_TOKEN;
+if (!token) {
+  throw new Error("SLACK_BOT_TOKEN is not defined");
+}
+
+const receiver = new AwsLambdaReceiver({ signingSecret });
+const app = new App({ token, receiver });
+
+const config = loadConfig("config.yaml");
+const handler = Handler(config);
+
+app.command(Command.incident, handler.openReportModal);
+app.command(Command.showFlow, handler.processAsync);
+
+app.view({
+  callback_id: CallbackId.initialReportSubmitted,
+  type: "view_submission",
+}, handler.processAsync);
+app.view({
+  callback_id: CallbackId.updateIncidentLevel,
+  type: "view_submission",
+}, handler.processAsync);
+app.view({
+  callback_id: CallbackId.declareContainment,
+  type: "view_submission",
+}, handler.processAsync);
+
+app.action(ActionId.assignResponder, handler.processAsync);
+app.action(ActionId.openIncidentLevelModal, handler.openIncidentLevelModal);
+app.action(ActionId.openContainmentModal, handler.openContainmentModal);
+app.action(ActionId.showTimeline, handler.processAsync);
+
+app.event("reaction_added", handler.processAsync);
+
+export const lambdaHandler = async (
+  event: AwsEvent,
+  context: any,
+  callback: AwsCallback,
+): Promise<AwsResponse> => {
+  const handler = await receiver.start();
+  return handler(event, context, callback);
+};

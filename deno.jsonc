@@ -1,0 +1,8 @@
+{
+  "tasks": {
+    "bot:dev": "deno run --watch ./bot-function/main.ts",
+    "bot:build": "docker build -f ./bot-function/Dockerfile -t incident-senpai:latest ./bot-function",
+    "bot:run": "docker run -e SLACK_BOT_TOKEN=123 -e SLACK_SIGNING_SECRET=123 -p 8080:8080 incident-senpai:latest",
+    "bot:invoke": "curl -XPOST \"http://localhost:8080/2015-03-31/functions/function/invocations\" -d '{\"payload\":\"hello world!\"}'"
+  }
+}
