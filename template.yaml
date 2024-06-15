@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   incident-senpai
@@ -52,7 +52,7 @@ Resources:
         Target: "es2020"
         Sourcemap: false
         EntryPoints:
-        - app.ts
+          - app.ts
 
   BotFunctionRole:
     Type: AWS::IAM::Role
@@ -97,7 +97,7 @@ Resources:
         Target: "es2020"
         Sourcemap: false
         EntryPoints:
-        - app.ts
+          - app.ts
 
   AsyncTaskQueue:
     Type: AWS::SQS::Queue
