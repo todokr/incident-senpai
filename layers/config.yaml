@@ -1,0 +1,363 @@
+---
+version: 1
+incident_response:
+  slack:
+    base_channel_id: C0606T6A3B5
+    channel_prefix: incident
+  zoom:
+    url: https://zoom.us/j/123456789
+
+  triage_levels:
+    emergency:
+      label: "サービスへの甚大な影響があり、緊急事態"
+    immediate:
+      label: "サービスへの影響があり、対応が必要"
+    investigate:
+      label: "サービスへの影響は不明で、調査が必要"
+    maintain:
+      label: "サービスへの影響はなし（予防措置をとる）"
+
+  incident_levels:
+    disaster:
+      label: Disaster
+    severe:
+      label: Severe
+    hard:
+      label: Hard
+    minor:
+      label: Minor
+    under-minor:
+      label: Minor未満
+
+  roles:
+    commander:
+      label: 指揮者
+      description: 障害対応の舵取りを行う
+      message: あわてず落ち着いて関係者と対応を進めましょう。まずは各ロールのアサインを行ってください。
+    communication-lead-dev:
+      label: コミュニケーションリード（開発）
+      description: 開発側コミュニケーション窓口
+      message: 関係者同士のコミュニケーションを取りまとめてください。
+    communication-lead-biz:
+      label: コミュニケーションリード（ビジネス）
+      description: ビジネス側コミュニケーション窓口
+      message: 関係者同士のコミュニケーションを取りまとめてください。
+    effect-investigator:
+      label: 影響調査
+      description: サービスの影響範囲の調査を行う
+      message: 影響範囲の調査を開始し、5分おきに状況を共有してください。
+    cause-investigator:
+      label: 原因調査
+      description: 障害の原因調査を行う
+      message: 原因を調査し、判明したことを都度このチャンネルに報告してください。
+
+  recipients:
+    executives:
+      label: 事業部長クラス
+      ids:
+        - U06042X1P29
+    sre:
+      label: SRE
+      ids:
+        - U06042WM2S1
+        - U0606T6PQG3
+    pm:
+      label: PM
+      ids:
+        - U06070MR5DG
+    manager_inventory:
+      label: 在庫Tマネージャー
+      ids:
+        - U0609DVTLKW
+    developers_inventory:
+      label: 在庫T開発者
+      ids:
+        - U06070MSEF4
+        - U06042WPP9B
+        - U060KKCNEHX
+    manager_shipping:
+      label: 配送Tマネージャー
+      ids:
+        - U060W0FU9ME
+    developers_shipping:
+      label: 配送T開発者
+      ids:
+        - U05V6EBAGG7
+        - U05V6EBD087
+    manager_payment:
+      label: 決済Tマネージャー
+      ids:
+        - U060KKCPFQR
+    developer_payment:
+      label: 決済T開発者
+      ids:
+        - U060W0G1JRE
+    billing_manager:
+      label: 請求Tマネージャー
+      ids:
+        - U0606T6F61H
+    billing_developer:
+      label: 請求T開発者
+      ids:
+        - U05V6EBJ3AB
+        - U060KKCKK17
+
+  services:
+    inventory-service:
+      label: 在庫サービス
+    payment-service:
+      label: 決済サービス
+    billing-service:
+      label: 請求サービス
+    shipping-service:
+      label: 配送サービス
+    all-services:
+      label: 全サービス
+
+  notification_policies:
+    - recipients:
+        - executives
+        - sre
+        - pm
+        - manager_inventory
+        - developers_inventory
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - emergency
+        - property: services
+          anyOf:
+            - inventory-service
+    - recipients:
+        - sre
+        - pm
+        - manager_inventory
+        - developers_inventory
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - immediate
+        - property: services
+          anyOf:
+            - inventory-service
+    - recipients:
+        - pm
+        - manager_inventory
+        - developers_inventory
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - investigate
+        - property: services
+          anyOf:
+            - inventory-service
+    # 配送 ----------------------------------------
+    - recipients:
+        - executives
+        - sre
+        - pm
+        - manager_shipping
+        - developers_shipping
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - emergency
+        - property: services
+          anyOf:
+            - delivery-service
+    - recipients:
+        - sre
+        - pm
+        - manager_shipping
+        - developers_shipping
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - immediate
+        - property: services
+          anyOf:
+            - delivery-service
+    - recipients:
+        - pm
+        - manager_shipping
+        - developers_shipping
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - investigate
+        - property: services
+          anyOf:
+            - shippingy-service
+    # 決済 ----------------------------------------
+    - recipients:
+        - executives
+        - sre
+        - pm
+        - manager_payment
+        - developers_payment
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - emergency
+        - property: services
+          anyOf:
+            - payment-service
+    - recipients:
+        - sre
+        - pm
+        - manager_payment
+        - developers_payment
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - immediate
+        - property: services
+          anyOf:
+            - payment-service
+    - recipients:
+        - pm
+        - manager_payment
+        - developers_payment
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - investigate
+        - property: services
+          anyOf:
+            - payment-service
+    # 請求 ----------------------------------------
+    - recipients:
+        - executives
+        - sre
+        - pm
+        - billing_manager
+        - billing_developer
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - emergency
+        - property: services
+          anyOf:
+            - billing-service
+    - recipients:
+        - sre
+        - pm
+        - billing_manager
+        - billing_developer
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - immediate
+        - property: services
+          anyOf:
+            - billing-service
+    - recipients:
+        - pm
+        - billing_manager
+        - billing_developer
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - investigate
+        - property: services
+          anyOf:
+            - billing-service
+    # 配送 ----------------------------------------
+    - recipients:
+        - executives
+        - sre
+        - pm
+        - manager_shipping
+        - developers_shipping
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - emergency
+        - property: services
+          anyOf:
+            - shipping-service
+    - recipients:
+        - sre
+        - pm
+        - manager_shipping
+        - developers_shipping
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - immediate
+        - property: services
+          anyOf:
+            - shipping-service
+    - recipients:
+        - pm
+        - manager_shipping
+        - developers_shipping
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - investigate
+        - property: services
+          anyOf:
+            - shipping-service
+    # 全サービス ----------------------------------------
+    - recipients:
+        - executives
+        - sre
+        - pm
+        - manager_inventory
+        - developers_inventory
+        - manager_payment
+        - developers_payment
+        - manager_billing
+        - developers_billing
+        - manager_shipping
+        - developers_shipping
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - emergency
+        - property: services
+          anyOf:
+            - all-services
+    - recipients:
+        - sre
+        - pm
+        - manager_inventory
+        - developers_inventory
+        - manager_payment
+        - developers_payment
+        - manager_billing
+        - developers_billing
+        - manager_shipping
+        - developers_shipping
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - immediate
+        - property: services
+          anyOf:
+            - all-services
+    - recipients:
+        - pm
+        - manager_inventory
+        - developers_inventory
+        - manager_payment
+        - developers_payment
+        - manager_billing
+        - developers_billing
+        - manager_shipping
+        - developers_shipping
+      conditions:
+        - property: triage_levels
+          anyOf:
+            - investigate
+        - property: services
+          anyOf:
+            - all-services
+
+postmortem:
+  confluence:
+    domain: zarafa-app.atlassian.net
+    space: SD
+    parent_page_id: 197154
+    api_token_env_var: CONFLUENCE_API_TOKEN

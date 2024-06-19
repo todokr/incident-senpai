@@ -1,0 +1,65 @@
+definitions:
+  service:
+    name: "サービス"
+    items: &serviceOptions
+      appA:
+        label: "アプリケーションA"
+      appB:
+        label: "アプリケーションB"
+      appC:
+        label: "アプリケーションC"
+      all:
+        label: "全サービス"
+  triage:
+    name: "温度感"
+    items: &triageOptions
+      emergency:
+        label: ":fire: サービスに影響が出ており、緊急の対応が必要"
+      investigate:
+        label: ":mag: サービスに影響が出ている可能性があり、調査が必要"
+      maintenance:
+        label: ":wrench: 現時点でサービスに影響はないが、予防措置を取る"
+  severity:
+    name: "インシデントレベル"
+    items: &severityOptions
+      critical:
+        label: ":police-car-light: Critical"
+      major:
+        label: ":prohibited: Major"
+      minor:
+        label: ":warning: Minor"
+integration:
+  slack:
+    enabled: true
+    baseChannelId: "C01B2AB3CD4"
+    channelPrefix: "inc_"
+flow:
+  trigger:
+    type: "slack/command"
+    command: "/inc"
+    firstStep: "openInitialForm"
+  steps:
+    openInitialForm:
+      action: "slack/modal"
+      title: "インシデントの疑いを報告"
+      components:
+        - type: "checkbox"
+          label: "サービス"
+          options: *serviceOptions
+          blockId: "service"
+          actionId: "selectedService"
+        - type: "radio"
+          label: "温度感"
+          options: *triageOptions
+          blockId: "triage"
+          actionId: "selectedTriage"
+        - type: "textInput"
+          label: "発生している事象"
+          blockId: "description"
+          actionId: "incidentDescription"
+          multiline: true
+      nextStep: "initialReport"
+    initialReport:
+      action: "slack/post"
+      channel: "hogehoge"
+      message: "インシデントを報告しました。"

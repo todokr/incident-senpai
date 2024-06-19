@@ -21,7 +21,7 @@ Parameters:
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Runtime: nodejs18.x
+    Runtime: nodejs20.x
     Architectures:
       - !Ref Architecture
     Layers:
@@ -38,7 +38,7 @@ Resources:
       MemorySize: 256
       Timeout: 3
       CodeUri: bot-function/
-      Handler: app.lambdaHandler
+      Handler: bot-function.lambdaHandler
       FunctionUrlConfig:
         AuthType: NONE
       Environment:
@@ -46,13 +46,14 @@ Resources:
           ASYNC_TASK_QUEUE_URL: !GetAtt AsyncTaskQueue.QueueUrl
       Role: !GetAtt BotFunctionRole.Arn
     Metadata:
+      Architecture: !Ref Architecture
       BuildMethod: esbuild
       BuildProperties:
         Minify: true
         Target: "es2020"
-        Sourcemap: false
+        Sourcemap: true
         EntryPoints:
-          - app.ts
+          - bot-function.ts
 
   BotFunctionRole:
     Type: AWS::IAM::Role
@@ -91,6 +92,7 @@ Resources:
             BatchSize: 10
             Enabled: true
     Metadata:
+      Architecture: !Ref Architecture
       BuildMethod: esbuild
       BuildProperties:
         Minify: true
@@ -114,7 +116,7 @@ Resources:
         - x86_64
         - arm64
       CompatibleRuntimes:
-        - nodejs18.x
+        - nodejs20.x
       RetentionPolicy: Retain
     Metadata:
       BuildMethod: makefile
