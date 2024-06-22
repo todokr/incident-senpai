@@ -1,0 +1,5 @@
+{
+  "tasks": {
+    "bot:run": "deno run -A ./bot-function/dev-server.ts"
+  }
+}
