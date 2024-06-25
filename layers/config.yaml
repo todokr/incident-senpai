@@ -31,7 +31,7 @@ definitions:
 integration:
   slack:
     enabled: true
-    baseChannelId: "C01B2AB3CD4"
+    baseChannelId: &baseChannelId "C01B2AB3CD4"
     channelPrefix: "inc_"
 flow:
   trigger:
@@ -42,26 +42,67 @@ flow:
     openInitialForm:
       action: "slack/openModal"
       title: "インシデントの疑いを報告"
-      components:
-        - componentId: "selectService"
-          type: "checkbox"
+      elements:
+        - type: "header"
+          text: "インシデントの疑いを報告"
+        - type: "text"
+          text: "インシデントの疑いを報告します。"
+        - type: "checkbox"
+          elementId: "selectService"
           label: "サービス"
           options: *serviceOptions
-        - componentId: "selectTriage"
-          type: "radio"
+        - type: "radio"
+          elementId: "selectTriage"
           label: "温度感"
           options: *triageOptions
-        - componentId: "incidentDescription"
-          type: "textInput"
+        - type: "textInput"
+          elementId: "incidentDescription"
           label: "発生している事象"
           placeholder: "決済システムが500エラー"
           multiline: true
+        - type: "note"
+          text: "今わかっていることをざっくりで構いません"
       submit:
         label: "報告"
-        invoke: "initialReport"
+        run:
+          - "initialReport"
+          - "createWarRoomChannel"
+          - "invitePeoples"
+          - "setPingCycle"
       cancel:
         label: "キャンセル"
     initialReport:
       action: "slack/post"
-      channelId: "C01B2AB3CD4"
-      message: "インシデントを報告しました。"
+      channelId: *baseChannelId
+      elements:
+        - type: "header"
+          text: "インシデントの疑い"
+        - type: "text"
+          text: "サービス: {{input.selectService}}"
+        - type: "text"
+          text: "温度感: {{input.selectTriage}}"
+        - type: "text"
+          text: "事象: {{input.incidentDescription}}"
+        - type: "channelSelect"
+          elementId: "incidentChannel"
+          label: "インシデントチャンネル"
+        - type: "radio"
+          elementId: "selectSeverity"
+          label: "インシデントレベル"
+          options: *severityOptions
+        - type: "note"
+          text: "インシデントのレベルを選択してください"
+        - type: "select"
+          elementId: "selectAssignee"
+          label: "担当者"
+          options:
+            userA:
+              label: "ユーザーA"
+            userB:
+              label: "ユーザーB"
+            userC:
+              label: "ユーザーC"
+        - type: "button"
+          elementId: "reportButton"
+          label: "報告"
+          invoke: "reportIncident"

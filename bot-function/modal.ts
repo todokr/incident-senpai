@@ -7,12 +7,12 @@ import type {
 } from "npm:@slack/bolt/types/views/modal";
 
 import type {
+    ModalRadioComponent,
+    ModalSelectComponent,
     OptionItems,
     SlackCheckboxComponent,
     SlackDescriptionComponent,
     SlackOpenModalAction,
-    SlackRadioComponent,
-    SlackSelectComponent,
     SlackTextInputComponent,
 } from "../shared/config.ts";
 
@@ -33,7 +33,7 @@ export function toModalView(action: SlackOpenModalAction): ModalView {
                 return description(component);
         }
     });
-    console.log({ callback_id: `${CallBackIdPrefix}${action.nextStep}` });
+
     return {
         type: "modal",
         title: {
@@ -61,10 +61,10 @@ export function toModalView(action: SlackOpenModalAction): ModalView {
 function selectBlock(component: SlackSelectComponent): InputBlock {
     return {
         type: "input",
-        block_id: component.blockId,
+        block_id: component.componentId,
         element: {
             type: "static_select",
-            action_id: component.actionId,
+            action_id: component.componentId,
             placeholder: {
                 type: "plain_text",
                 text: component.label,
@@ -81,10 +81,10 @@ function selectBlock(component: SlackSelectComponent): InputBlock {
 function radio(component: SlackRadioComponent): InputBlock {
     return {
         type: "input",
-        block_id: component.blockId,
+        block_id: component.componentId,
         element: {
             type: "radio_buttons",
-            action_id: component.actionId,
+            action_id: component.componentId,
             options: mrkdwnOptions(component.options),
         },
         label: {
@@ -97,10 +97,10 @@ function radio(component: SlackRadioComponent): InputBlock {
 function checkbox(component: SlackCheckboxComponent): InputBlock {
     return {
         type: "input",
-        block_id: component.blockId,
+        block_id: component.componentId,
         element: {
             type: "checkboxes",
-            action_id: component.actionId,
+            action_id: component.componentId,
             options: mrkdwnOptions(component.options),
         },
         label: {
@@ -113,14 +113,14 @@ function checkbox(component: SlackCheckboxComponent): InputBlock {
 function textInput(component: SlackTextInputComponent): InputBlock {
     return {
         type: "input",
-        block_id: component.blockId,
+        block_id: component.componentId,
         label: {
             type: "plain_text",
             text: component.label,
         },
         element: {
             type: "plain_text_input",
-            action_id: component.actionId,
+            action_id: component.componentId,
             placeholder: component.placeholder
                 ? {
                     type: "plain_text",

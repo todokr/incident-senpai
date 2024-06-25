@@ -15,76 +15,133 @@ const OptionItems = z.record(
 );
 export type OptionItems = z.infer<typeof OptionItems>;
 
-const SlackSelectComponent = z.object({
-    componentId: z.string(),
+const PlainSelectElement = z.object({
+    elementId: z.string(),
     type: z.literal("select"),
     label: z.string(),
     options: OptionItems,
 });
-export type SlackSelectComponent = z.infer<typeof SlackSelectComponent>;
+export type PlainSelectElement = z.infer<typeof PlainSelectElement>;
 
-const SlackRadioComponent = z.object({
-    componentId: z.string(),
+const ChannelSelectElement = z.object({
+    elementId: z.string(),
+    type: z.literal("channelSelect"),
+    label: z.string(),
+});
+export type ChannelSelectElement = z.infer<typeof ChannelSelectElement>;
+
+const UserSelectElement = z.object({
+    elementId: z.string(),
+    type: z.literal("userSelect"),
+    label: z.string(),
+});
+export type UserSelectElement = z.infer<typeof UserSelectElement>;
+
+const RadioElement = z.object({
+    elementId: z.string(),
     type: z.literal("radio"),
     label: z.string(),
     options: OptionItems,
 });
-export type SlackRadioComponent = z.infer<typeof SlackRadioComponent>;
+export type RadioElement = z.infer<typeof RadioElement>;
 
-const SlackCheckboxComponent = z.object({
-    componentId: z.string(),
+const CheckboxElement = z.object({
+    elementId: z.string(),
     type: z.literal("checkbox"),
     label: z.string(),
     options: OptionItems,
 });
-export type SlackCheckboxComponent = z.infer<typeof SlackCheckboxComponent>;
+export type CheckboxElement = z.infer<typeof CheckboxElement>;
 
-const SlackTextInputComponent = z.object({
-    componentId: z.string(),
+const TextInputElement = z.object({
+    elementId: z.string(),
     type: z.literal("textInput"),
     label: z.string(),
     placeholder: z.string().optional(),
     optional: z.boolean().default(false),
     multiline: z.boolean().default(false),
 });
-export type SlackTextInputComponent = z.infer<typeof SlackTextInputComponent>;
+export type TextInputElement = z.infer<typeof TextInputElement>;
 
-const SlackDescriptionComponent = z.object({
-    componentId: z.string(),
-    type: z.literal("description"),
+const DateTimePickerElement = z.object({
+    elementId: z.string(),
+    type: z.literal("dateTimePicker"),
+    label: z.string(),
+});
+export type DateTimePickerElement = z.infer<typeof DateTimePickerElement>;
+
+const HeaderElement = z.object({
+    type: z.literal("header"),
     text: z.string(),
 });
-export type SlackDescriptionComponent = z.infer<
-    typeof SlackDescriptionComponent
+export type HeaderElement = z.infer<typeof HeaderElement>;
+
+const TextElement = z.object({
+    type: z.literal("text"),
+    text: z.string(),
+});
+export type TextElement = z.infer<
+    typeof TextElement
 >;
 
-const SlackComponent = z.discriminatedUnion("type", [
-    SlackRadioComponent,
-    SlackSelectComponent,
-    SlackCheckboxComponent,
-    SlackTextInputComponent,
-    SlackDescriptionComponent,
-]);
-export type SlackComponent = z.infer<typeof SlackComponent>;
+const NoteElement = z.object({
+    type: z.literal("note"),
+    text: z.string(),
+});
 
-const SlackModalAction = z.object({
+export const ButtonElement = z.object({
+    elementId: z.string(),
+    type: z.literal("button"),
+    label: z.string(),
+    invoke: z.string(),
+});
+
+const ModalElement = z.discriminatedUnion("type", [
+    PlainSelectElement,
+    ChannelSelectElement,
+    UserSelectElement,
+    RadioElement,
+    CheckboxElement,
+    TextInputElement,
+    DateTimePickerElement,
+    HeaderElement,
+    TextElement,
+    NoteElement,
+]);
+export type ModalElement = z.infer<typeof ModalElement>;
+
+const SlackOpenModalAction = z.object({
     action: z.literal("slack/openModal"),
     title: z.string(),
-    components: z.array(SlackComponent),
+    elements: z.array(ModalElement),
     submit: z.object({
         label: z.string(),
-        invoke: z.string(),
+        run: z.array(z.string()),
     }),
     cancel: z.object({
         label: z.string(),
     }).optional(),
 });
-export type SlackOpenModalAction = z.infer<typeof SlackModalAction>;
+export type SlackOpenModalAction = z.infer<typeof SlackOpenModalAction>;
+
+const PostElement = z.discriminatedUnion("type", [
+    PlainSelectElement,
+    ChannelSelectElement,
+    UserSelectElement,
+    RadioElement,
+    CheckboxElement,
+    TextInputElement,
+    DateTimePickerElement,
+    HeaderElement,
+    TextElement,
+    NoteElement,
+    ButtonElement,
+]);
 
 const SlackPostAction = z.object({
     action: z.literal("slack/post"),
     channelId: z.string(),
-    message: z.string(),
+    elements: z.array(PostElement),
 });
 export type SlackPostAction = z.infer<typeof SlackPostAction>;
 
@@ -99,7 +156,7 @@ const Definition = z.object({
 });
 
 const Action = z.discriminatedUnion("action", [
-    SlackModalAction,
+    SlackOpenModalAction,
     SlackPostAction,
 ]);
 export type Action = z.infer<typeof Action>;
@@ -130,5 +187,5 @@ export async function loadConfig(path: string): Promise<Config> {
 
 Deno.test("loadConfig", async () => {
     const config = await loadConfig("./layers/config.yaml");
-    console.log(config);
+    console.log(JSON.stringify(config, null, 2));
 });
