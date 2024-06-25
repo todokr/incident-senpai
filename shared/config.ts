@@ -1,4 +1,4 @@
-import { z } from "npm:zod";
+import { late, z } from "npm:zod";
 import { parse } from "jsr:@std/yaml";
 
 const SlackCommandTrigger = z.object({
@@ -71,9 +71,13 @@ const SlackModalAction = z.object({
     action: z.literal("slack/openModal"),
     title: z.string(),
     components: z.array(SlackComponent),
-    submit: z.string().optional(),
-    cancel: z.string().optional(),
-    nextStep: z.string(),
+    submit: z.object({
+        label: z.string(),
+        invoke: z.string(),
+    }),
+    cancel: z.object({
+        label: z.string(),
+    }).optional(),
 });
 export type SlackOpenModalAction = z.infer<typeof SlackModalAction>;
 
@@ -100,8 +104,8 @@ const Action = z.discriminatedUnion("action", [
 ]);
 export type Action = z.infer<typeof Action>;
 
-const Steps = z.record(z.string(), Action);
-type Steps = z.infer<typeof Steps>;
+const Functions = z.record(z.string(), Action);
+type Functions = z.infer<typeof Functions>;
 
 const Config = z.object({
     definitions: z.record(z.string(), Definition.or(z.undefined())),
@@ -114,7 +118,7 @@ const Config = z.object({
     }),
     flow: z.object({
         trigger: SlackCommandTrigger,
-        steps: Steps,
+        functions: Functions,
     }),
 });
 type Config = z.infer<typeof Config>;

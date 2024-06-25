@@ -38,7 +38,7 @@ flow:
     type: "slack/command"
     command: "/inc"
     firstStep: "openInitialForm"
-  steps:
+  functions:
     openInitialForm:
       action: "slack/openModal"
       title: "インシデントの疑いを報告"
@@ -56,10 +56,11 @@ flow:
           label: "発生している事象"
           placeholder: "決済システムが500エラー"
           multiline: true
-      submit: "報告"
-      cancel: "閉じる"
-      nextStep: "initialReport"
-
+      submit:
+        label: "報告"
+        invoke: "initialReport"
+      cancel:
+        label: "キャンセル"
     initialReport:
       action: "slack/post"
       channelId: "C01B2AB3CD4"
