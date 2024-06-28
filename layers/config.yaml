@@ -1,17 +1,17 @@
 definitions:
   service:
-    name: "サービス"
+    name: サービス
     items: &serviceOptions
       appA:
-        label: "アプリケーションA"
+        label: アプリケーションA
       appB:
-        label: "アプリケーションB"
+        label: アプリケーションB
       appC:
-        label: "アプリケーションC"
+        label: アプリケーションC
       all:
-        label: "全サービス"
+        label: 全サービス
   triage:
-    name: "温度感"
+    name: 温度感
     items: &triageOptions
       emergency:
         label: ":fire: サービスに影響が出ており、緊急の対応が必要"
@@ -20,7 +20,7 @@ definitions:
       maintenance:
         label: ":wrench: 現時点でサービスに影響はないが、予防措置を取る"
   severity:
-    name: "インシデントレベル"
+    name: インシデントレベル
     items: &severityOptions
       critical:
         label: ":police-car-light: Critical"
@@ -31,78 +31,77 @@ definitions:
 integration:
   slack:
     enabled: true
-    baseChannelId: &baseChannelId "C01B2AB3CD4"
-    channelPrefix: "inc_"
+    baseChannelId: &baseChannelId C0606T6A3B5
+    channelPrefix: inc_
 flow:
   trigger:
-    type: "slack/command"
-    command: "/inc"
-    firstStep: "openInitialForm"
+    type: slack/command
+    invoke: openInitialForm
   functions:
-    openInitialForm:
-      action: "slack/openModal"
-      title: "インシデントの疑いを報告"
+    - name: openInitialForm
+      action: slack/openModal
+      title: インシデントの疑いを報告
       elements:
-        - type: "header"
-          text: "インシデントの疑いを報告"
-        - type: "text"
-          text: "インシデントの疑いを報告します。"
-        - type: "checkbox"
-          elementId: "selectService"
-          label: "サービス"
+        - type: header
+          text: インシデントの疑いを報告
+        - type: text
+          text: インシデントの疑いを報告します。
+        - type: checkbox
+          elementId: selectService
+          label: サービス
           options: *serviceOptions
-        - type: "radio"
-          elementId: "selectTriage"
-          label: "温度感"
+        - type: radio
+          elementId: selectTriage
+          label: 温度感
           options: *triageOptions
-        - type: "textInput"
-          elementId: "incidentDescription"
-          label: "発生している事象"
-          placeholder: "決済システムが500エラー"
+        - type: textInput
+          elementId: incidentDescription
+          label: 発生している事象
+          placeholder: 決済システムが500エラー
           multiline: true
-        - type: "note"
-          text: "今わかっていることをざっくりで構いません"
+        - type: note
+          text: 今わかっていることをざっくりで構いません
       submit:
-        label: "報告"
-        run:
-          - "initialReport"
-          - "createWarRoomChannel"
-          - "invitePeoples"
-          - "setPingCycle"
+        label: 報告
       cancel:
-        label: "キャンセル"
-    initialReport:
-      action: "slack/post"
+        label: キャンセル
+      invoke:
+        - initialReport
+        - createWarRoomChannel
+        - invitePeoples
+        - setPingCycle
+    - name: initialReport
+      action: slack/post
       channelId: *baseChannelId
       elements:
-        - type: "header"
-          text: "インシデントの疑い"
-        - type: "text"
-          text: "サービス: {{input.selectService}}"
-        - type: "text"
-          text: "温度感: {{input.selectTriage}}"
-        - type: "text"
-          text: "事象: {{input.incidentDescription}}"
-        - type: "channelSelect"
-          elementId: "incidentChannel"
-          label: "インシデントチャンネル"
-        - type: "radio"
-          elementId: "selectSeverity"
-          label: "インシデントレベル"
+        - type: header
+          text: インシデントの疑い
+        - type: dl
+          items:
+            サービス: ${{input.selectService}}
+            温度感: ${{input.selectTriage}}
+            事象: ${{input.incidentDescription}}
+            報告者: ${{trigger.user.name}}
+        - type: channelSelect
+          elementId: incidentChannel
+          label: インシデントチャンネル
+        - type: radio
+          elementId: selectSeverity
+          label: インシデントレベル
           options: *severityOptions
-        - type: "note"
-          text: "インシデントのレベルを選択してください"
-        - type: "select"
-          elementId: "selectAssignee"
-          label: "担当者"
+        - type: note
+          text: インシデントのレベルを選択してください
+        - type: select
+          elementId: selectAssignee
+          label: 担当者
           options:
             userA:
-              label: "ユーザーA"
+              label: ユーザーA
             userB:
-              label: "ユーザーB"
+              label: ユーザーB
             userC:
-              label: "ユーザーC"
-        - type: "button"
-          elementId: "reportButton"
-          label: "報告"
-          invoke: "reportIncident"
+              label: ユーザーC
+        - type: button
+          elementId: reportButton
+          label: 報告
+          invoke: reportIncident
