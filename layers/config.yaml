@@ -67,9 +67,9 @@ flow:
         label: キャンセル
       invoke:
         - initialReport
-        - createWarRoomChannel
-        - invitePeoples
-        - setPingCycle
+        # - createWarRoomChannel
+        # - invitePeoples
+        # - setPingCycle
     - name: initialReport
       action: slack/post
       channelId: *baseChannelId
@@ -78,30 +78,7 @@ flow:
           text: インシデントの疑い
         - type: dl
           items:
-            サービス: ${{input.selectService}}
-            温度感: ${{input.selectTriage}}
-            事象: ${{input.incidentDescription}}
-            報告者: ${{trigger.user.name}}
-        - type: channelSelect
-          elementId: incidentChannel
-          label: インシデントチャンネル
-        - type: radio
-          elementId: selectSeverity
-          label: インシデントレベル
-          options: *severityOptions
-        - type: note
-          text: インシデントのレベルを選択してください
-        - type: select
-          elementId: selectAssignee
-          label: 担当者
-          options:
-            userA:
-              label: ユーザーA
-            userB:
-              label: ユーザーB
-            userC:
-              label: ユーザーC
-        - type: button
-          elementId: reportButton
-          label: 報告
-          invoke: reportIncident
+            "サービス": ${{input.values.selectService.label}}
+            "温度感": ${{input.values.selectTriage.label}}
+            "事象": ${{input.values.incidentDescription.label}}
+            "報告者": <@${{input.user.id}}>

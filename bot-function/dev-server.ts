@@ -10,6 +10,9 @@ Deno.serve({ port: Port }, async (req) => {
   console.log(JSON.stringify(botReq, null, 2));
 
   const res = await main(botReq);
+  if (res.ok && res.body) {
+    return Response.json(res.body, { status: 200 });
+  }
   if (res.ok) {
     return new Response(null, { status: 200 });
   }

@@ -141,6 +141,7 @@ const PostElement = z.discriminatedUnion("type", [
   ButtonElement,
   DefinitionListElement,
 ]);
+export type PostElement = z.infer<typeof PostElement>;
 
 const SlackPostFunction = z.object({
   name: z.string(),
@@ -182,7 +183,19 @@ const Functions = z.array(FlowFunction).refine((fns) => {
     names.add(fn.name);
   }
   return true;
-}, { message: "function names must be unique" });
+}, { message: "function names must be unique" })
+  .refine((fns) => {
+    const notFound = fns.flatMap((fn) => {
+      const invokes = fn.action === "slack/openModal" ? fn.invoke : [];
+      return invokes
+        .filter((invoke) => !fns.some((x) => x.name === invoke))
+        .map((invoke) => ({ name: fn.name, invoke }));
+    });
+    return notFound.length === 0;
+  }, {
+    message: "Function specified in invoke not found",
+  });
+
 type Functions = z.infer<typeof Functions>;
 
 const Flow = z.object({
