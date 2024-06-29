@@ -101,8 +101,15 @@ function expand(variableable: string, input: any): string {
     let result: any = input;
     try {
       // deno-lint-ignore no-explicit-any
-      result = path.reduce((acc: any, key: string) => acc[key], input);
+      result = path.reduce((acc: any, key: string) => {
+        if (Array.isArray(acc)) {
+          return acc.map((item) => item[key]);
+        } else {
+          return acc[key];
+        }
+      }, input);
     } catch (_e) {
+      console.error(_e);
       result = `🚨 could not expand config variable from config.
 
       -----------------------------------------
@@ -115,15 +122,26 @@ function expand(variableable: string, input: any): string {
       -----------------------------------------
       ${JSON.stringify(input, null, 2)}`;
     }
-    return result;
+
+    if (Array.isArray(result)) {
+      return result.join(", ");
+    } else {
+      return result;
+    }
   });
 }
 
 Deno.test("expand", () => {
-  const input = { values: { name: "John", age: 24 } };
+  const input = {
+    values: { name: "John", age: 24 },
+    countries: [{ name: "Japan", code: "JP" }, { name: "America", code: "US" }],
+  };
   assertEquals(
-    expand("Hello, ${{input.vlaues.name}}(${{input.values.age}})", input),
-    "Hello, John(24)",
+    expand(
+      "${{input.values.name}}(${{input.values.age}}) ${{input.countries.code}}",
+      input,
+    ),
+    "John(24) JP, US",
   );
 });
 

@@ -76,6 +76,10 @@ flow:
       elements:
         - type: header
           text: インシデントの疑い
+        - type: text
+          text: <!here> インシデントの疑いが報告されました。
+        - type: note
+          text: 以下の情報を確認してください。
         - type: dl
           items:
             "サービス": ${{input.values.selectService.label}}
