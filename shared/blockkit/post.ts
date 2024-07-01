@@ -51,6 +51,7 @@ export function toPost(
   return {
     channel: fn.channelId,
     blocks: postContent,
+    text: JSON.stringify(postContent),
   };
 }
 

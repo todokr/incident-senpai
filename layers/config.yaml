@@ -71,6 +71,7 @@ flow:
         label: キャンセル
       invoke:
         - initialReport
+        - createIncident
         # - createWarRoomChannel
         # - invitePeoples
         # - setPingCycle
@@ -79,14 +80,29 @@ flow:
       channelId: *baseChannelId
       elements:
         - type: header
-          text: インシデントの疑い
+          text: ":rotating_light: ${{input.values.incidentDescription.value}} (${{input.values.selectTriage.label}})"
         - type: text
           text: <!here> インシデントの疑いが報告されました。
+        - type: text
+          text: ":fire: ${{input.values.selectTriage.label}}"
+        # - type: divider
         - type: note
           text: 以下の情報を確認してください。
         - type: dl
           items:
             "サービス": ${{input.values.selectService.label}}
-            "温度感": ${{input.values.selectTriage.label}}
-            "事象": ${{input.values.incidentDescription.label}}
+            "事象": ${{input.values.incidentDescription.value}}
             "報告者": <@${{input.user.id}}>
+    - name: createIncident
+      action: incident/create
+      summary: ${{input.values.incidentDescription.value}}
+      reporter:
+        id: ${{input.user.id}}
+        name: ${{input.user.name}}
+      metadata:
+        service:
+          - label: ${{input.values.selectService.label}}
+            value: ${{input.values.selectService.value}}
+        triage:
+          label: ${{input.values.selectTriage.label}}
+          value: ${{input.values.selectTriage.value}}

@@ -151,6 +151,18 @@ const SlackPostFunction = z.object({
 });
 export type SlackPostFunction = z.infer<typeof SlackPostFunction>;
 
+const IncidentCreateFunction = z.object({
+  name: z.string(),
+  action: z.literal("incident/create"),
+  summary: z.string(),
+  reporter: z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
+  metadata: z.record(z.string(), z.any()),
+});
+export type IncidentCreateFunction = z.infer<typeof IncidentCreateFunction>;
+
 const Definition = z.object({
   name: z.string(),
   items: z.record(
@@ -171,6 +183,7 @@ type Trigger = SlackCommandTrigger;
 const FlowFunction = z.discriminatedUnion("action", [
   SlackOpenModalFunction,
   SlackPostFunction,
+  IncidentCreateFunction,
 ]);
 export type FlowFunction = z.infer<typeof FlowFunction>;
 
