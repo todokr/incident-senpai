@@ -94,7 +94,6 @@ const InputVarPattern = /\${{input\.([^}]+)}}/g;
 
 // deno-lint-ignore no-explicit-any
 function expand(variableable: string, input: any): string {
-  console.log(variableable, input);
   return variableable.replace(InputVarPattern, (_, varExpr) => {
     const path = varExpr.split(".");
     // deno-lint-ignore no-explicit-any

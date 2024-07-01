@@ -1,3 +1,12 @@
+integrations:
+  slack:
+    baseChannelId: &baseChannelId C0606T6A3B5
+    channelPrefix: inc_
+  datastore:
+    type: dynamodb
+    region: ap-northeast-1
+    tableName: incident
+
 definitions:
   service:
     name: サービス
@@ -28,11 +37,6 @@ definitions:
         label: ":prohibited: Major"
       minor:
         label: ":warning: Minor"
-integration:
-  slack:
-    enabled: true
-    baseChannelId: &baseChannelId C0606T6A3B5
-    channelPrefix: inc_
 flow:
   trigger:
     type: slack/command

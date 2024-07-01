@@ -38,7 +38,6 @@ export async function main(req: BotRequest): Promise<BotResponse> {
   if (isModalSubmission(req)) {
     const nextFns = config.nextFns(req.body.view.callback_id);
     const input = inputFromModal(req.body);
-    console.log("input", input);
     await Promise.all(nextFns.map((fn) => exec(fn, input)));
     return { ok: true };
   }

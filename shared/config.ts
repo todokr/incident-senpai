@@ -207,14 +207,18 @@ const Flow = z.object({
 }, { message: 'Function specified in "flow.trigger.invoke" not found' });
 
 const ConfigSchema = z.object({
-  definitions: z.record(z.string(), Definition.or(z.undefined())),
-  integration: z.object({
+  integrations: z.object({
     slack: z.object({
-      enabled: z.boolean(),
       baseChannelId: z.string(),
       channelPrefix: z.string(),
     }),
+    datastore: z.object({
+      type: z.literal("dynamodb"),
+      region: z.string(),
+      tableName: z.string(),
+    }).optional(),
   }),
+  definitions: z.record(z.string(), Definition.or(z.undefined())),
   flow: Flow,
 });
 type ConfigSchema = z.infer<typeof ConfigSchema>;
