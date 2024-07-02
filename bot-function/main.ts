@@ -4,18 +4,25 @@ import type {
   ViewStateValue,
   ViewSubmitAction,
 } from "npm:@slack/bolt";
-import { WebClient } from "npm:@slack/web-api";
-import { InputBlock } from "npm:@slack/types";
-import { Config, type FlowFunction } from "../shared/config.ts";
-import { toModalView } from "../shared/blockkit/modal.ts";
-import { toPost } from "../shared/blockkit/post.ts";
+import type { InputBlock } from "npm:@slack/types";
+import { Config } from "../shared/config.ts";
 import { mapRecord } from "../shared/helper.ts";
+import {
+  Executor,
+  type FunctionInput,
+  type FunctionInputValue,
+} from "./executor.ts";
 
-const token = Deno.env.get("SLACK_BOT_TOKEN");
-if (!token) {
-  throw new Error("missing SLACK_BOT_TOKEN");
+const SlackToken = Deno.env.get("SLACK_BOT_TOKEN");
+if (!SlackToken) {
+  throw new Error("SLACK_BOT_TOKEN is not defined");
 }
-const slackClient = new WebClient(token);
+const QueueUrl = Deno.env.get("ASYNC_TASK_QUEUE_URL");
+if (!QueueUrl) {
+  throw new Error("ASYNC_TASK_QUEUE_URL is not defined");
+}
+
+const executor = new Executor(SlackToken, QueueUrl);
 
 export async function main(req: BotRequest): Promise<BotResponse> {
   if (isChallenge(req)) {
@@ -33,12 +40,12 @@ export async function main(req: BotRequest): Promise<BotResponse> {
     const fn = config.fn(config.trigger.invoke);
     if (!fn) throw new Error("no function found");
     const input = inputFromSlashCommand(req.body);
-    await exec(fn, input);
+    await executor.run(fn, input);
   }
   if (isModalSubmission(req)) {
     const nextFns = config.nextFns(req.body.view.callback_id);
     const input = inputFromModal(req.body);
-    await Promise.all(nextFns.map((fn) => exec(fn, input)));
+    await Promise.all(nextFns.map((fn) => executor.run(fn, input)));
     return { ok: true };
   }
 
@@ -138,37 +145,6 @@ function extractInputValue(
         label: value.value ?? undefined,
         value: value.value ?? undefined,
       };
-  }
-}
-
-export type FunctionInput = {
-  triggerId: string;
-  user?: {
-    id: string;
-    name: string;
-  };
-  values: {
-    [key: string]: FunctionInputValue | FunctionInputValue[];
-  };
-};
-type FunctionInputValue = { label?: string; value?: string };
-
-async function exec(
-  fn: FlowFunction,
-  input: FunctionInput,
-) {
-  switch (fn.action) {
-    case "slack/openModal": {
-      const modalOpen = {
-        view: toModalView(fn),
-        trigger_id: input.triggerId,
-      };
-      return await slackClient.views.open(modalOpen);
-    }
-    case "slack/post": {
-      const post = toPost(fn, input);
-      return await slackClient.chat.postMessage(post);
-    }
   }
 }
 
