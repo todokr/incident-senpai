@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert/assert_equals";
+import { assertEquals } from "jsr:@std/assert@^0.226.0";
 
 export function mapRecord<V, R>(
   record: Record<string, V>,

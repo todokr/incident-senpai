@@ -2,8 +2,10 @@
   "version": "3",
   "packages": {
     "specifiers": {
-      "jsr:@std/assert": "jsr:@std/assert@0.220.1",
+      "jsr:@std/assert": "jsr:@std/assert@0.226.0",
+      "jsr:@std/assert@^0.226.0": "jsr:@std/assert@0.226.0",
       "jsr:@std/fmt@^0.220.1": "jsr:@std/fmt@0.220.1",
+      "jsr:@std/internal@^1.0.0": "jsr:@std/internal@1.0.1",
       "jsr:@std/yaml": "jsr:@std/yaml@0.224.1",
       "npm:@aws-sdk/client-sqs": "npm:@aws-sdk/client-sqs@3.609.0_@aws-sdk+client-sts@3.609.0__@aws-sdk+client-sso-oidc@3.609.0___@aws-sdk+client-sts@3.609.0___@aws-sdk+client-sts@3.609.0_@aws-sdk+client-sso-oidc@3.609.0__@aws-sdk+client-sts@3.609.0___@aws-sdk+client-sso-oidc@3.609.0____@aws-sdk+client-sts@3.609.0____@aws-sdk+client-sts@3.609.0__@aws-sdk+client-sts@3.609.0___@aws-sdk+client-sso-oidc@3.609.0____@aws-sdk+client-sts@3.609.0_____@aws-sdk+client-sso-oidc@3.609.0___@aws-sdk+client-sso-oidc@3.609.0",
       "npm:@slack/bolt": "npm:@slack/bolt@3.18.0",
@@ -19,8 +21,17 @@
           "jsr:@std/fmt@^0.220.1"
         ]
       },
+      "@std/assert@0.226.0": {
+        "integrity": "0dfb5f7c7723c18cec118e080fec76ce15b4c31154b15ad2bd74822603ef75b3",
+        "dependencies": [
+          "jsr:@std/internal@^1.0.0"
+        ]
+      },
       "@std/fmt@0.220.1": {
         "integrity": "3b1a698477a26b1dacbbee26db1a65030a005c6d71db3b3a0e59f8a638f04d7a"
+      },
+      "@std/internal@1.0.1": {
+        "integrity": "6f8c7544d06a11dd256c8d6ba54b11ed870aac6c5aeafff499892662c57673e6"
       },
       "@std/yaml@0.224.1": {
         "integrity": "cbb444acccce7ea34b9ef6678bff84c18eba89b790e52dd098def8dae313f0b2"
@@ -3052,6 +3063,7 @@
     "https://deno.land/x/deno_slack_api@2.1.1/typed-method-types/workflows/triggers/trigger-filter.ts": "db0583587e893b9dd4e30e1e413c5b177ac032c9053510bcdbd3d099b23130b6",
     "https://deno.land/x/deno_slack_api@2.1.1/typed-method-types/workflows/triggers/webhook.ts": "eda0d5dffa7bd987d4d1134ba3f96508caaf1675a70049ac89aaa41e77c40007",
     "https://deno.land/x/deno_slack_api@2.1.1/types.ts": "092319fbe26d5e26b7289c3a3efcbf8c5be7f3e69727a0ee09808503f0719026",
+    "https://deno.land/x/lambda@1.44.4/mod.ts": "315b66c882a4b502bcd2ccdbfdf72892cb657378f6af0c78f8460c94946f7d5c",
     "https://esm.sh/@aws-sdk/client-dynamodb@3.606.0?dts": "3269e78b1a1c45c1f0fc81aa71a590ea005ef7999bd9d8acc2c9f28c1e34df80",
     "https://esm.sh/v135/@aws-crypto/sha256-browser@5.2.0/denonext/sha256-browser.mjs": "84e59b20eb4974a23fafdcf5fcd6513757ad195ca809b80d19a389602cff335a",
     "https://esm.sh/v135/@aws-crypto/sha256-js@5.2.0/denonext/sha256-js.mjs": "2e1014e03baf7b5eb5d773c8409af836dacbec2c0a522b789774f76d3eb2e5ad",
