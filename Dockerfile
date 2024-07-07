@@ -1,10 +1,7 @@
-FROM denoland/deno-lambda:1.44.4
-
-RUN pwd
-RUN ls -la
-
-COPY ./bot-function ./bot-function
-COPY ./shared ./shared
-RUN deno cache bot-function/lambda.ts
-
-CMD ["bot-function/lambda.handler"]
+FROM gcr.io/distroless/cc as runner
+ARG BUILD_ARTIFACT
+ARG CONFIG_DIR
+COPY --chown=nonroot:nonroot $BUILD_ARTIFACT bootstrap
+COPY --chown=nonroot:nonroot $CONFIG_DIR $CONFIG_DIR
+USER nonroot
+CMD ["./bootstrap"]

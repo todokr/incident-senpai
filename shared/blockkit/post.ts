@@ -4,7 +4,7 @@ import {
 } from "npm:@slack/web-api";
 import { HeaderElement, PostElement, SlackPostFunction } from "../config.ts";
 import * as block from "./blocks.ts";
-import { FunctionInput } from "../../bot-function/main.ts";
+import { FunctionInput } from "../../bot-function/executor.ts";
 import { assertEquals } from "jsr:@std/assert";
 import { mapRecord } from "../helper.ts";
 

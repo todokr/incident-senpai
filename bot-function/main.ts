@@ -149,7 +149,6 @@ function extractInputValue(
 }
 
 export type BotRequest = {
-  path: string;
   // deno-lint-ignore no-explicit-any
   body: { [key: string]: any };
 };
