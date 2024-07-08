@@ -20,8 +20,6 @@ docker build \
   --build-arg CONFIG_DIR=$CONFIG_DIR \
   -f Dockerfile .
 
-exit 0;
-
   aws \
   --region ap-northeast-1 \
   ecr get-login-password | \

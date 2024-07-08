@@ -1,3 +1,4 @@
+import { decodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 import { parse } from "node:querystring";
 import type {
   APIGatewayProxyEventV2,
@@ -17,7 +18,7 @@ while (true) {
   const rawRequest: APIGatewayProxyEventV2 = await event.json();
 
   const body = parseRequestBody(
-    rawRequest.body ?? "",
+    getRawBody(rawRequest),
     rawRequest.headers["content-type"],
   );
   const res = await main({ body });
@@ -36,6 +37,16 @@ while (true) {
     method: "POST",
     body: JSON.stringify(response),
   });
+}
+
+function getRawBody(event: APIGatewayProxyEventV2): string {
+  if (typeof event === "undefined" || event.body == null) {
+    return "";
+  }
+  if (event.isBase64Encoded) {
+    return new TextDecoder().decode(decodeBase64(event.body));
+  }
+  return event.body;
 }
 
 // from: https://github.com/slackapi/bolt-js/blob/main/src/receivers/AwsLambdaReceiver.ts

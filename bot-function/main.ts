@@ -35,6 +35,7 @@ export async function main(req: BotRequest): Promise<BotResponse> {
   }
 
   const config = await Config.load("./layers/config.yaml");
+  console.log(JSON.stringify(req));
 
   if (isSlashCommand(req)) {
     const fn = config.fn(config.trigger.invoke);
