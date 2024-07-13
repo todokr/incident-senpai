@@ -1,5 +1,5 @@
 import type { ModalView } from "npm:@slack/bolt/types/views/modal";
-import type { SlackOpenModalFunction } from "../config.ts";
+import type { SlackOpenModalFunction } from "../config/functions.ts";
 import * as block from "./blocks.ts";
 
 export function toModalView(fn: SlackOpenModalFunction): ModalView {

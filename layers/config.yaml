@@ -160,8 +160,8 @@ notificationPolicies:
       - *teamDelivery
       - *sre
       - *pdm
-defaultNotificationPolicy:
-  label: "デフォルト通知ポリシー"
-  recipients:
-    - developers_a
-    - developers_b
+fallbackNotificationPolicy:
+  - *teamDelivery
+  - *teamMerchandise
+  - *teamClaim
+  - *sre

@@ -2,11 +2,11 @@ import {
   ChatPostEphemeralArguments,
   ChatPostMessageArguments,
 } from "npm:@slack/web-api";
-import { HeaderElement, PostElement, SlackPostFunction } from "../config.ts";
-import * as block from "./blocks.ts";
 import { FunctionInput } from "../../bot-function/executor.ts";
-import { assertEquals } from "jsr:@std/assert";
+import { PostElement } from "../../shared/model/element.ts";
+import { SlackPostFunction } from "../config/functions.ts";
 import { mapRecord } from "../helper.ts";
+import * as block from "./blocks.ts";
 
 export function toPost(
   fn: SlackPostFunction,
@@ -55,7 +55,7 @@ export function toPost(
   };
 }
 
-function expandVariable<T>(
+export function expandVariable<T>(
   element: T extends PostElement ? T : never,
   // deno-lint-ignore no-explicit-any
   input: any,
@@ -76,17 +76,6 @@ function expandVariable<T>(
   }
   return result;
 }
-Deno.test("expandVariable", () => {
-  const input = { person: { name: "John", age: 24 } };
-  const header: HeaderElement = {
-    type: "header",
-    text: "Hello, ${{person.name}}(${{person.age}})",
-  };
-  assertEquals(expandVariable(header, input), {
-    type: "header",
-    text: "Hello, John(24)",
-  });
-});
 
 /**
  * Expand variables in the form of `${{input.person.name}}` in the given string.
@@ -130,20 +119,6 @@ function expand(variableable: string, input: any): string {
     }
   });
 }
-
-Deno.test("expand", () => {
-  const input = {
-    values: { name: "John", age: 24 },
-    countries: [{ name: "Japan", code: "JP" }, { name: "America", code: "US" }],
-  };
-  assertEquals(
-    expand(
-      "${{input.values.name}}(${{input.values.age}}) ${{input.countries.code}}",
-      input,
-    ),
-    "John(24) JP, US",
-  );
-});
 
 export function toEphemeral(
   fn: SlackPostFunction,

@@ -1,7 +1,7 @@
 import { WebClient } from "npm:@slack/web-api";
 
 import { toModalView } from "../shared/blockkit/modal.ts";
-import { FlowFunction } from "../shared/config.ts";
+import { Function } from "../shared/config/functions.ts";
 import { toPost } from "../shared/blockkit/post.ts";
 import { SQS } from "npm:@aws-sdk/client-sqs";
 import { AsyncTask } from "../shared/async-task.ts";
@@ -29,7 +29,7 @@ export class Executor {
     this.queueUrl = queueUrl;
   }
 
-  async run(fn: FlowFunction, input: FunctionInput) {
+  async run(fn: Function, input: FunctionInput) {
     switch (fn.action) {
       case "slack/openModal": {
         const modalOpen = {

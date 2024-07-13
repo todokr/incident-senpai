@@ -8,7 +8,7 @@ import type {
   ViewSubmitAction,
 } from "npm:@slack/bolt";
 import type { InputBlock } from "npm:@slack/types";
-import { Config } from "../shared/config.ts";
+import { Config } from "../shared/config/config.ts";
 import { mapRecord } from "../shared/helper.ts";
 import {
   Executor,
@@ -30,7 +30,7 @@ const executor = new Executor(SlackToken, QueueUrl);
 
 await start(main);
 
-async function main(
+export async function main(
   rawRequest: APIGatewayProxyEventV2,
 ): Promise<BotResponse> {
   const body = parseRequestBody(

@@ -13,7 +13,7 @@ import type {
   TextElement,
   TextInputElement,
   UserSelectElement,
-} from "../config.ts";
+} from "../model/element.ts";
 
 export function selectBlock(element: PlainSelectElement): KnownBlock {
   return {
