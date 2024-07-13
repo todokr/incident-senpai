@@ -1,3 +1,6 @@
+import { decodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
+import { APIGatewayProxyEventV2 } from "https://deno.land/x/lambda@1.44.4/mod.ts";
+import { parse } from "node:querystring";
 import type {
   SlashCommand,
   ViewClosedAction,
@@ -12,6 +15,7 @@ import {
   type FunctionInput,
   type FunctionInputValue,
 } from "./executor.ts";
+import { start } from "../shared/lambda-entrypoint.ts";
 
 const SlackToken = Deno.env.get("SLACK_BOT_TOKEN");
 if (!SlackToken) {
@@ -24,7 +28,16 @@ if (!QueueUrl) {
 
 const executor = new Executor(SlackToken, QueueUrl);
 
-export async function main(req: BotRequest): Promise<BotResponse> {
+await start(main);
+
+async function main(
+  rawRequest: APIGatewayProxyEventV2,
+): Promise<BotResponse> {
+  const body = parseRequestBody(
+    getRawBody(rawRequest),
+    rawRequest.headers["content-type"],
+  );
+  const req = { body };
   if (isChallenge(req)) {
     return {
       ok: true,
@@ -191,3 +204,42 @@ export type BotResponse = {
   // deno-lint-ignore no-explicit-any
   body?: Record<string, any>;
 };
+
+function getRawBody(event: APIGatewayProxyEventV2): string {
+  if (typeof event === "undefined" || event.body == null) {
+    return "";
+  }
+  if (event.isBase64Encoded) {
+    return new TextDecoder().decode(decodeBase64(event.body));
+  }
+  return event.body;
+}
+
+// from: https://github.com/slackapi/bolt-js/blob/main/src/receivers/AwsLambdaReceiver.ts
+function parseRequestBody(
+  stringBody: string,
+  contentType: string | undefined,
+  // deno-lint-ignore no-explicit-any
+): any {
+  if (contentType === "application/x-www-form-urlencoded") {
+    const parsedBody = parse(stringBody);
+    if (typeof parsedBody.payload === "string") {
+      return JSON.parse(parsedBody.payload);
+    }
+    return parsedBody;
+  }
+  if (contentType === "application/json") {
+    return JSON.parse(stringBody);
+  }
+
+  console.warn(`Unexpected content-type detected: ${contentType}`);
+  try {
+    // Parse this body anyway
+    return JSON.parse(stringBody);
+  } catch (e) {
+    console.error(
+      `Failed to parse body as JSON data for content-type: ${contentType}`,
+    );
+    throw e;
+  }
+}

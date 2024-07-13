@@ -4,6 +4,7 @@ import { toModalView } from "../shared/blockkit/modal.ts";
 import { FlowFunction } from "../shared/config.ts";
 import { toPost } from "../shared/blockkit/post.ts";
 import { SQS } from "npm:@aws-sdk/client-sqs";
+import { AsyncTask } from "../shared/async-task.ts";
 
 export type FunctionInput = {
   triggerId: string;
@@ -40,16 +41,17 @@ export class Executor {
       }
       case "slack/post": {
         const post = toPost(fn, input);
-        await this.enqueue(post, fn.action);
+        await this.enqueue({ action: fn.action, payload: post });
         return;
       }
     }
   }
 
-  private async enqueue(payload: unknown, action: FlowFunction["action"]) {
+  private async enqueue(task: AsyncTask) {
     await this.sqsClient.sendMessage({
-      MessageBody: JSON.stringify({ action, payload }),
+      MessageBody: JSON.stringify(task),
       QueueUrl: this.queueUrl,
+      MessageGroupId: "default",
     });
   }
 }
