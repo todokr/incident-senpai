@@ -19,3 +19,14 @@
 ## スクリーンショット
 
 ## デプロイメント
+
+```sh
+./deploy.sh incident-senpai-bot ./bot-function/main.ts
+```
+
+
+```sh
+./deploy.sh incident-senpai-async ./async-function/main.ts
+```
+
+
