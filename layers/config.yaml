@@ -6,17 +6,16 @@ integrations:
     type: dynamodb
     region: ap-northeast-1
     tableName: incident
-
 definitions:
   service:
     name: サービス
     items: &serviceOptions
-      appA:
-        label: アプリケーションA
-      appB:
-        label: アプリケーションB
-      appC:
-        label: アプリケーションC
+      delivery:
+        label: 配送管理
+      merchandise:
+        label: 商品管理
+      claim:
+        label: 請求管理
       all:
         label: 全サービス
   triage:
@@ -106,3 +105,63 @@ flow:
         triage:
           label: ${{input.values.selectTriage.label}}
           value: ${{input.values.selectTriage.value}}
+notificationGroups:
+  executive: &executive
+    label: 事業部長
+    ids:
+      - U06042X1P29 # demo EC事業部長
+  teamDelivery: &teamDelivery
+    label: 配送管理チーム
+    ids:
+      - U05V6EBAGG7 # demo 配送T dev
+      - U05V6EBD087 # demo 配送T dev
+      - U060W0FU9ME # demo 配送T mgr
+  teamMerchandise: &teamMerchandise
+    label: 商品管理チーム
+    ids:
+      - U06070MSEF4 # demo 商品T dev
+      - U06042WPP9B # demo 商品T dev
+      - U0609DVTLKW # demo 商品T mgr
+  teamClaim: &teamClaim
+    label: 請求管理チーム
+    ids:
+      - U060KKCKK17 # demo 請求T dev
+      - U05V6EBJ3AB # demo 請求T dev
+      - U0606T6F61H # demo 請求T mgr
+  sre: &sre
+    label: SRE
+    ids:
+      - U0606T6PQG3 # demo SRE
+  pdm: &pdm
+    label: PdM
+    ids:
+      - U06070MR5DG # demo PdM
+notificationPolicies:
+  - label: "(温度感 = emergency || severity = critical) && service = 配送サービス => 配送管理チーム, 事業部長, SRE, PdM"
+    condition:
+      op: and
+      conditions:
+        - op: or
+          conditions:
+            - op: anyOf
+              property: triage
+              values:
+                - emergency
+            - op: anyOf
+              property: severity
+              values:
+                - critical
+        - op: anyOf
+          property: service
+          values:
+            - delivery
+    recipients:
+      - *executive
+      - *teamDelivery
+      - *sre
+      - *pdm
+defaultNotificationPolicy:
+  label: "デフォルト通知ポリシー"
+  recipients:
+    - developers_a
+    - developers_b

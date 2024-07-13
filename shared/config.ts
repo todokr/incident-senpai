@@ -1,5 +1,7 @@
-import { z } from "npm:zod";
+import { any, z } from "npm:zod";
 import { parse } from "jsr:@std/yaml";
+import { assertEquals } from "jsr:@std/assert/assert-equals";
+import { assert } from "jsr:@std/assert/assert";
 
 const OptionItems = z.record(
   z.string(),
@@ -225,6 +227,69 @@ const DynamoDBStore = z.object({
   tableName: z.string(),
 });
 
+const NotificationGroup = z.object({
+  label: z.string(),
+  ids: z.array(z.string()),
+});
+const NotificationGroups = z.record(z.string(), NotificationGroup);
+
+type AndCondition = {
+  op: "and";
+  conditions: Condition[];
+};
+type OrCondition = {
+  op: "or";
+  conditions: Condition[];
+};
+
+type AnyOfCondition = {
+  op: "anyOf";
+  property: string;
+  values: string[];
+};
+type Condition = AndCondition | OrCondition | AnyOfCondition;
+
+const Condition: z.ZodType<Condition> = z.object({
+  op: z.literal("and"),
+  conditions: z.lazy(() => z.array(Condition)),
+}).or(
+  z.object({
+    op: z.literal("or"),
+    conditions: z.lazy(() => z.array(Condition)),
+  }),
+).or(
+  z.object({
+    op: z.literal("anyOf"),
+    property: z.string(),
+    values: z.array(z.string()),
+  }),
+);
+
+Deno.test("Condition", () => {
+  const cond: Condition = {
+    op: "and",
+    conditions: [
+      {
+        op: "or",
+        conditions: [
+          { op: "anyOf", property: "triage", values: ["emergency"] },
+          { op: "anyOf", property: "severity", values: ["critical", "major"] },
+        ],
+      },
+      { op: "anyOf", property: "service", values: ["delivery"] },
+    ],
+  };
+  const actual = Condition.parse(cond);
+  assertEquals(actual.op, "and");
+  assertEquals((actual as AndCondition).conditions[0].op, "or");
+});
+
+const NotificationPolicy = z.object({
+  label: z.string(),
+  recipients: z.array(NotificationGroup),
+  condition: Condition,
+});
+
 const ConfigSchema = z.object({
   integrations: z.object({
     slack: z.object({
@@ -235,6 +300,8 @@ const ConfigSchema = z.object({
   }),
   definitions: z.record(z.string(), Definition.or(z.undefined())),
   flow: Flow,
+  notificationGroups: NotificationGroups,
+  notificationPolicies: z.array(NotificationPolicy),
 });
 type ConfigSchema = z.infer<typeof ConfigSchema>;
 
@@ -264,7 +331,9 @@ export class Config {
 
   static async load(path: string): Promise<Config> {
     const file = await Deno.readTextFile(path);
-    const parsed = ConfigSchema.parse(parse(file));
+    const rawConfig = parse(file);
+    const parsed = ConfigSchema.parse(rawConfig);
+
     return new Config(parsed);
   }
 }
