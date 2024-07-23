@@ -5,6 +5,7 @@ import { Function } from "../shared/config/functions.ts";
 import { toPost } from "../shared/blockkit/post.ts";
 import { SQS } from "npm:@aws-sdk/client-sqs";
 import { AsyncTask } from "../shared/async-task.ts";
+import { evalExpr } from "../shared/expr-eval.ts";
 
 export type FunctionInput = {
   triggerId: string;
@@ -37,13 +38,29 @@ export class Executor {
           trigger_id: input.triggerId,
         };
         await this.slackClient.views.open(modalOpen);
-        return;
+        break;
       }
       case "slack/post": {
         const post = toPost(fn, input);
         await this.enqueue({ action: fn.action, payload: post });
-        return;
+        break;
       }
+      case "datastore/createIncident": {
+        const payload = {
+          summary: evalExpr(fn.summary, input),
+          reporter: {
+            id: evalExpr(fn.reporter.id, input),
+            name: evalExpr(fn.reporter.name, input),
+          },
+          metadata: fn.metadata,
+        };
+        await this.enqueue({ action: fn.action, payload });
+        break;
+      }
+      default:
+        throw new Error(
+          `Unknown type: ${(fn as { action: "__invalid__" }).action}`,
+        );
     }
   }
 

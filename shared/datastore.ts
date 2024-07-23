@@ -1,4 +1,4 @@
-import { Incident } from "./model.ts";
+import { Incident } from "./model/incident.ts";
 
 interface DataStore {
   store(incident: Incident): Promise<Incident>;

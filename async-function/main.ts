@@ -28,6 +28,11 @@ async function consume(event: SQSEvent): Promise<{ body: string }> {
         console.debug("slack/postEphemeral", JSON.stringify(body.payload));
         return { body: "ok" };
       }
+      case "datastore/createIncident": {
+        console.debug("datastore/createIncident", JSON.stringify(body.payload));
+        // TODO: Implement incident creation logic
+        return { body: "ok" };
+      }
     }
   } else {
     console.error("Unknown task", JSON.stringify(body));

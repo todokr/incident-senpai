@@ -7,6 +7,7 @@ import { PostElement } from "../../shared/model/element.ts";
 import { SlackPostFunction } from "../config/functions.ts";
 import { mapRecord } from "../helper.ts";
 import * as block from "./blocks.ts";
+import { evalExpr } from "../expr-eval.ts";
 
 export function toPost(
   fn: SlackPostFunction,
@@ -57,67 +58,23 @@ export function toPost(
 
 export function expandVariable<T>(
   element: T extends PostElement ? T : never,
-  // deno-lint-ignore no-explicit-any
-  input: any,
+  input: FunctionInput,
 ): T {
   let result: T = element;
   if ("text" in element) {
-    result = { ...element, text: expand(element.text, input) };
+    result = { ...element, text: evalExpr(element.text, input) };
   }
   if ("label" in element) {
-    result = { ...element, label: expand(element.label, input) };
+    result = { ...element, label: evalExpr(element.label, input) };
   }
   if ("items" in element) {
     const expandedItems = mapRecord(
       element.items,
-      ([key, value]) => [key, expand(value, input)],
+      ([key, value]) => [key, evalExpr(value, input)],
     );
     result = { ...element, items: expandedItems };
   }
   return result;
-}
-
-/**
- * Expand variables in the form of `${{input.person.name}}` in the given string.
- */
-const InputVarPattern = /\${{input\.([^}]+)}}/g;
-
-// deno-lint-ignore no-explicit-any
-function expand(variableable: string, input: any): string {
-  return variableable.replace(InputVarPattern, (_, varExpr) => {
-    const path = varExpr.split(".");
-    // deno-lint-ignore no-explicit-any
-    let result: any = input;
-    try {
-      // deno-lint-ignore no-explicit-any
-      result = path.reduce((acc: any, key: string) => {
-        if (Array.isArray(acc)) {
-          return acc.map((item) => item[key]);
-        } else {
-          return acc[key];
-        }
-      }, input);
-    } catch (_e) {
-      console.error(_e);
-      result = `🚨 could not expand config variable from config.
-
-      -----------------------------------------
-      variable
-      -----------------------------------------
-      ${varExpr}
-
-      -----------------------------------------
-      input
-      -----------------------------------------
-      ${JSON.stringify(input, null, 2)}`;
-    }
-
-    if (Array.isArray(result)) {
-      return result.join(", ");
-    } else {
-      return result;
-    }
-  });
 }
 
 export function toEphemeral(

@@ -36,6 +36,15 @@ definitions:
         label: ":prohibited: Major"
       minor:
         label: ":warning: Minor"
+model:
+  status:
+    type: enum
+    multiple: false
+    values:
+      open: 未対応
+      inProgress: 対応中
+      resolved: 解決済
+  
 flow:
   trigger:
     type: slack/command
@@ -93,14 +102,14 @@ flow:
             "事象": ${{input.values.incidentDescription.value}}
             "報告者": <@${{input.user.id}}>
     - name: createIncident
-      action: incident/create
+      action: datastore/createIncident
       summary: ${{input.values.incidentDescription.value}}
       reporter:
         id: ${{input.user.id}}
         name: ${{input.user.name}}
       metadata:
         service:
-          - label: ${{input.values.selectService.label}}
+          - label: ${{input.values.selectService.label}} # ここはだめ。複数選択の場合はどうする？
             value: ${{input.values.selectService.value}}
         triage:
           label: ${{input.values.selectTriage.label}}

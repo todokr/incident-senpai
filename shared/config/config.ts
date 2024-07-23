@@ -35,16 +35,16 @@ export class Config {
     if (!invokerFn) {
       throw new Error(`Function with name "${callbackId}" not found`);
     }
-
-    switch (invokerFn.action) {
-      case "slack/openModal":
-        return invokerFn.invoke
-          .map((x) => this.fn(x))
-          .filter((x) => x !== undefined)
-          .map((x) => x!);
-      case "slack/post":
-        throw new Error("slack/post never invokes another function");
+    if (invokerFn.action !== "slack/openModal") {
+      throw new Error(
+        `Function with name "${callbackId}" is not a slack/openModal function. Only slack/openModal functions can invoke other functions.`,
+      );
     }
+
+    return invokerFn.invoke
+      .map((x) => this.fn(x))
+      .filter((x) => x !== undefined)
+      .map((x) => x!);
   }
 
   static async load(path: string): Promise<Config> {
