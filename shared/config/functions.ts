@@ -24,19 +24,9 @@ const SlackPostFunction = z.object({
 });
 export type SlackPostFunction = z.infer<typeof SlackPostFunction>;
 
-const MetadataItem = z.object({
-  label: z.string(),
-  value: z.string(),
-});
 const DatastoreCreateIncidentFunction = z.object({
   name: z.string(),
   action: z.literal("datastore/createIncident"),
-  summary: z.string(),
-  reporter: z.object({
-    id: z.string(),
-    name: z.string(),
-  }),
-  metadata: z.record(z.string(), MetadataItem.or(z.array(MetadataItem))),
 });
 
 const Function = z.discriminatedUnion("action", [

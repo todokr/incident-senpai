@@ -1,5 +1,13 @@
 import { z } from "npm:zod";
 
+// TODO validate field existence
+const FillFieldElement = z.object({
+  type: z.literal("fillField"),
+  field: z.string(),
+});
+
+export type FillFieldElement = z.infer<typeof FillFieldElement>;
+
 const OptionItems = z.record(
   z.string(),
   z.object({
@@ -89,6 +97,11 @@ const DefinitionListElement = z.object({
 });
 export type DefinitionListElement = z.infer<typeof DefinitionListElement>;
 
+const DividerElement = z.object({
+  type: z.literal("divider")
+});
+export type DividerElement = z.infer<typeof DividerElement>;
+
 export const ButtonElement = z.object({
   elementId: z.string(),
   type: z.literal("button"),
@@ -98,6 +111,7 @@ export const ButtonElement = z.object({
 export type ButtonElement = z.infer<typeof ButtonElement>;
 
 export const ModalElement = z.discriminatedUnion("type", [
+  FillFieldElement,
   PlainSelectElement,
   ChannelSelectElement,
   UserSelectElement,
@@ -124,5 +138,6 @@ export const PostElement = z.discriminatedUnion("type", [
   NoteElement,
   ButtonElement,
   DefinitionListElement,
+  DividerElement,
 ]);
 export type PostElement = z.infer<typeof PostElement>;

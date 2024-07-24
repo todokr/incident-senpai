@@ -9,8 +9,8 @@ export type Trigger = z.infer<typeof Trigger>;
 
 export const Flow = z.object({
   trigger: Trigger,
-  functions: Functions,
+  function: Functions,
 }).refine((flow) => {
-  const fnNames = flow.functions.map((fn) => fn.name);
-  return fnNames.includes(flow.trigger.invoke);
+  const fNames = flow.function.map((f) => f.name);
+  return fNames.includes(flow.trigger.invoke);
 }, { message: 'Function specified in "flow.trigger.invoke" not found' });

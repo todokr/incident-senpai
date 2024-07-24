@@ -11,7 +11,7 @@ const DynamoDBIntegration = z.object({
   tableName: z.string(),
 });
 
-export const Integrations = z.object({
+export const Integration = z.object({
   slack: SlackIntegration,
   datastore: DynamoDBIntegration,
 });

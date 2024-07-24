@@ -1,18 +1,19 @@
 import { parse } from "jsr:@std/yaml";
 import { z } from "npm:zod";
-import { Definitions } from "./definitions.ts";
 import { Flow, Trigger } from "./flow.ts";
+import { CustomField, StdField } from "./field.ts";
 import { Function } from "./functions.ts";
-import { Integrations } from "./integrations.ts";
-import { NotificationGroups, NotificationPolicies } from "./notification.ts";
+import { Integration } from "./integrations.ts";
+import { NotificationGroups, FallbackNotificationPolicy, NotificationPolicies } from "./notification.ts";
 
 const ConfigSchema = z.object({
-  integrations: Integrations,
-  definitions: Definitions,
+  integration: Integration,
+  stdField: StdField,
+  customField: CustomField,
   flow: Flow,
   notificationGroups: NotificationGroups,
   notificationPolicies: NotificationPolicies,
-  fallbackNotificationPolicy: NotificationGroups,
+  fallbackNotificationPolicy: FallbackNotificationPolicy,
 });
 type ConfigSchema = z.infer<typeof ConfigSchema>;
 
@@ -27,7 +28,7 @@ export class Config {
   }
 
   fn(name: string): Function | undefined {
-    return this._config.flow.functions.find((fn) => fn.name === name);
+    return this._config.flow.function.find((fn) => fn.name === name);
   }
 
   nextFns(callbackId: string): Function[] {
@@ -50,8 +51,6 @@ export class Config {
   static async load(path: string): Promise<Config> {
     const file = await Deno.readTextFile(path);
     const rawConfig = parse(file);
-    const parsed = ConfigSchema.parse(rawConfig);
-
-    return new Config(parsed);
+    return new Config(rawConfig);
   }
 }

@@ -1,4 +1,4 @@
-integrations:
+integration:
   slack:
     baseChannelId: &baseChannelId C0606T6A3B5
     channelPrefix: inc_
@@ -6,50 +6,51 @@ integrations:
     type: dynamodb
     region: ap-northeast-1
     tableName: incident
-definitions:
-  service:
-    name: サービス
-    items: &serviceOptions
-      delivery:
-        label: 配送管理
-      merchandise:
-        label: 商品管理
-      claim:
-        label: 請求管理
-      all:
-        label: 全サービス
-  triage:
-    name: 温度感
-    items: &triageOptions
-      emergency:
-        label: ":fire: サービスに影響が出ており、緊急の対応が必要"
-      investigate:
-        label: ":mag: サービスに影響が出ている可能性があり、調査が必要"
-      maintenance:
-        label: ":wrench: 現時点でサービスに影響はないが、予防措置を取る"
-  severity:
+stdField:
+  description:
+    name: 概要
+    placeholder: 決済システムが500エラー
+  services:
+    name: 影響サービス
+    items:
+      - code: delivery
+        value: "配送管理"
+      - code: merchandise
+        value: "商品管理"
+      - code: claim
+        value: "請求管理"
+      - code: all
+        value: "全サービス"
+  level:
     name: インシデントレベル
-    items: &severityOptions
-      critical:
-        label: ":police-car-light: Critical"
-      major:
-        label: ":prohibited: Major"
-      minor:
-        label: ":warning: Minor"
-model:
-  status:
+    items:
+      - code: sev1
+        value: ":police-car-light: SEV1"
+      - code: sev2
+        value: ":prohibited: SEV2"
+      - code: sev3
+        value: ":warning: SEV3"
+      - code: sev4
+        value: ":man-facepalming: SEV4"
+      - code: sev5
+        value: ":eyes: SEV5"
+customField:
+  triage:
     type: enum
+    name: 温度感
     multiple: false
-    values:
-      open: 未対応
-      inProgress: 対応中
-      resolved: 解決済
-  
+    items:
+      - code: open
+        value: 未対応
+      - code: inProgress
+        value: 対応中
+      - code: resolved
+        value: 解決済
 flow:
   trigger:
     type: slack/command
     invoke: openInitialForm
-  functions:
+  function:
     - name: openInitialForm
       action: slack/openModal
       title: インシデントの疑いを報告
@@ -58,19 +59,15 @@ flow:
           text: インシデントの疑いを報告
         - type: text
           text: インシデントの疑いを報告します。
-        - type: checkbox
-          elementId: selectService
-          label: サービス
-          options: *serviceOptions
-        - type: radio
-          elementId: selectTriage
+        - type: fillField
+          field: std.service
+          label: 影響サービス
+        - type: fillField
+          field: custom.triage
           label: 温度感
-          options: *triageOptions
-        - type: textInput
-          elementId: incidentDescription
+        - type: fillField
+          field: std.description
           label: 発生している事象
-          placeholder: 決済システムが500エラー
-          multiline: true
         - type: note
           text: 今わかっていることをざっくりで構いません
       submit:
@@ -88,32 +85,21 @@ flow:
       channelId: *baseChannelId
       elements:
         - type: header
-          text: ":rotating_light: ${{input.values.incidentDescription.value}} (${{input.values.selectTriage.label}})"
+          text: ":rotating_light: ${{std.description.value}} (${{custom.triage.value}})"
         - type: text
           text: <!here> インシデントの疑いが報告されました。
         - type: text
-          text: ":fire: ${{input.values.selectTriage.label}}"
-        # - type: divider
+          text: ":fire: ${{custom.triage.value}}"
+        - type: divider
         - type: note
           text: 以下の情報を確認してください。
         - type: dl
           items:
-            "サービス": ${{input.values.selectService.label}}
-            "事象": ${{input.values.incidentDescription.value}}
+            "サービス": ${{std.services.value}}
+            "事象": ${{std.description.value}}
             "報告者": <@${{input.user.id}}>
     - name: createIncident
       action: datastore/createIncident
-      summary: ${{input.values.incidentDescription.value}}
-      reporter:
-        id: ${{input.user.id}}
-        name: ${{input.user.name}}
-      metadata:
-        service:
-          - label: ${{input.values.selectService.label}} # ここはだめ。複数選択の場合はどうする？
-            value: ${{input.values.selectService.value}}
-        triage:
-          label: ${{input.values.selectTriage.label}}
-          value: ${{input.values.selectTriage.value}}
 notificationGroups:
   executive: &executive
     label: 事業部長

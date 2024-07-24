@@ -44,4 +44,5 @@ const NotificationPolicy = z.object({
   condition: Condition,
 });
 
-export const NotificationPolicies = z.record(z.string(), NotificationPolicy);
+export const NotificationPolicies = z.array(NotificationPolicy);
+export const FallbackNotificationPolicy = z.array(NotificationGroup);
