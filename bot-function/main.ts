@@ -1,9 +1,8 @@
-import { decodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
+import { decodeBase64 } from "jsr:@std/encoding/base64";
 import { APIGatewayProxyEventV2 } from "https://deno.land/x/lambda@1.44.4/mod.ts";
 import { parse } from "node:querystring";
 import type {
   SlashCommand,
-  ViewClosedAction,
   ViewStateValue,
   ViewSubmitAction,
 } from "npm:@slack/bolt";
@@ -11,8 +10,9 @@ import type { InputBlock } from "npm:@slack/types";
 import { Config } from "../shared/config/config.ts";
 import { mapRecord } from "../shared/helper.ts";
 import {
+CreateIncidentInput,
   Executor,
-  type FunctionInput,
+  OpenIncidentFormInput,
   type FunctionInputValue,
 } from "./executor.ts";
 import { start } from "../shared/lambda-entrypoint.ts";
@@ -48,18 +48,14 @@ export async function main(
   }
 
   const config = await Config.load("./layers/config.yaml");
-  console.log(JSON.stringify(req));
 
-  if (isSlashCommand(req)) {
-    const fn = config.fn(config.trigger.invoke);
-    if (!fn) throw new Error("no function found");
-    const input = inputFromSlashCommand(req.body);
-    await executor.run(fn, input);
+  if (isStartResponseTrigger(req)) {
+    const input = openIncidentFormInput(req.body);
+    await executor.openIncidentForm(config.createIncidentFunction, input);
   }
-  if (isModalSubmission(req)) {
-    const nextFns = config.nextFns(req.body.view.callback_id);
-    const input = inputFromModal(req.body);
-    await Promise.all(nextFns.map((fn) => executor.run(fn, input)));
+  if (isCreateIncidentSubmission(config, req)) {
+    const input = createIncidentInput(req.body);
+    await executor.createIncident(input);
     return { ok: true };
   }
 
@@ -71,34 +67,35 @@ export async function main(
   };
 }
 
-function inputFromSlashCommand(req: SlashCommand): FunctionInput {
+function openIncidentFormInput(req: SlashCommand): OpenIncidentFormInput {
   return {
     triggerId: req.trigger_id,
     user: {
       id: req.user_id,
       name: req.user_name,
-    },
-    values: {
-      "command": { value: req.command },
-      "text": { value: req.text },
-    },
+    }
   };
 }
 
-function inputFromModal(req: ViewSubmitAction): FunctionInput {
+function createIncidentInput(req: ViewSubmitAction): CreateIncidentInput {
   const values = mapRecord(req.view.state.values, ([blockId, action]) => {
-    // blockId === actionId. eg:
+    // blockId === actionId
+    // eg:
     // "selectTriage": { <- blockId
     //    "selectTriage": { <- actionId
     //      "type": "radio_buttons",
     //        "selected_option": {
-    const value: ViewStateValue = action[blockId]; //
+    req.view.state.values
+    const value: ViewStateValue = action[blockId];
+    // TODO: extract std & custom field value from value
     return [blockId, extractInputValue(value)];
   });
 
   return {
-    triggerId: req.trigger_id,
-    user: {
+    id: crypto.randomUUID(),
+    title: "todo:from-format-string",
+    description: values.description.value,
+    reporter: {
       id: req.user.id,
       name: req.user.name,
     },
@@ -178,25 +175,18 @@ export type SlashCommandRequest = {
   path: string;
   body: SlashCommand;
 };
-export function isSlashCommand(req: BotRequest): req is SlashCommandRequest {
+export function isStartResponseTrigger(req: BotRequest): req is SlashCommandRequest {
   return "command" in req.body;
 }
 export type ModalSubmissionRequest = {
   path: string;
   body: ViewSubmitAction;
 };
-export function isModalSubmission(
-  req: BotRequest,
-): req is ModalSubmissionRequest {
-  return req.body.type === "view_submission";
-}
 
-export type ModalClosedRequest = {
-  path: string;
-  body: ViewClosedAction;
-};
-export function isModalClosed(req: BotRequest): req is ModalClosedRequest {
-  return req.body.type === "view_closed";
+function isCreateIncidentSubmission(config: Config, req: BotRequest) {
+  const invoked = config.findFunction(req.body.view.callback_id)!;
+  const isCreation = invoked.action === "inc/createIncident";
+  return req.body.type === "view_submission" && isCreation;
 }
 
 export type BotResponse = {

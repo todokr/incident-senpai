@@ -5,7 +5,7 @@ export const StdField = z.object({
     name: z.string(),
     placeholder: z.string().optional(),
   }),
-  services: z.object({
+  status: z.object({
     name: z.string(),
     items: z.array(z.object({
       code: z.string(),
@@ -23,19 +23,27 @@ export const StdField = z.object({
 
 export type StdField = z.infer<typeof StdField>;
 
-const CustomEnumField = z.object({
-  type: z.literal("enum"),
+const SingleSelectField = z.object({
+  type: z.literal("singleSelect"),
   name: z.string(),
-  multiple: z.boolean(),
   items: z.array(z.object({
     code: z.string(),
     value: z.string()
   })),
-})
+});
+
+const MultiSelectField = z.object({
+  type: z.literal("multiSelect"),
+  name: z.string(),
+  items: z.array(z.object({
+    code: z.string(),
+    value: z.string()
+  })),
+});
 
 export const CustomField = z.record(
   z.string(),
-  z.discriminatedUnion("type", [CustomEnumField])
+  z.discriminatedUnion("type", [SingleSelectField, MultiSelectField])
 )
 
 export type CustomField = z.infer<typeof CustomField>;

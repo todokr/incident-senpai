@@ -1,9 +1,9 @@
 import type { ModalView } from "npm:@slack/bolt/types/views/modal";
-import type { SlackOpenModalFunction } from "../config/functions.ts";
+import type { CreateIncidentFunction } from "../config/functions.ts";
 import * as block from "./blocks.ts";
 
-export function toModalView(fn: SlackOpenModalFunction): ModalView {
-  const modalContent = fn.elements.map((element) => {
+export function toModalView(fn: CreateIncidentFunction): ModalView {
+  const modalContent = fn.modal.elements.map((element) => {
     switch (element.type) {
       case "select":
         return block.selectBlock(element);
@@ -32,16 +32,16 @@ export function toModalView(fn: SlackOpenModalFunction): ModalView {
     type: "modal",
     title: {
       type: "plain_text",
-      text: fn.title,
+      text: fn.modal.title,
     },
     blocks: modalContent,
     close: {
       type: "plain_text",
-      text: fn.cancel?.label ?? "キャンセル",
+      text: fn.modal.cancel?.label ?? "キャンセル",
     },
     submit: {
       type: "plain_text",
-      text: fn.submit.label ?? "送信",
+      text: fn.modal.submit.label ?? "送信",
     },
     notify_on_close: true,
     callback_id: fn.name,

@@ -2,7 +2,7 @@ import { parse } from "jsr:@std/yaml";
 import { z } from "npm:zod";
 import { Flow, Trigger } from "./flow.ts";
 import { CustomField, StdField } from "./field.ts";
-import { Function } from "./functions.ts";
+import { CreateIncidentFunction, Function } from "./functions.ts";
 import { Integration } from "./integrations.ts";
 import { NotificationGroups, FallbackNotificationPolicy, NotificationPolicies } from "./notification.ts";
 import { FillFieldElement } from "../model/element.ts";
@@ -26,27 +26,31 @@ export class Config {
     this._config = parsed
   }
 
-  get trigger(): Trigger {
-    return this._config.flow.trigger;
+  get createIncidentFunction(): CreateIncidentFunction {
+    const trigger = this._config.flow.trigger;
+    return this.findFunction(trigger.invoke) as CreateIncidentFunction;
   }
 
-  fn(name: string): Function | undefined {
+  findFunction(name: string): Function | undefined {
     return this._config.flow.function.find((fn) => fn.name === name);
   }
 
-  nextFns(callbackId: string): Function[] {
-    const invokerFn = this.fn(callbackId);
+  /** get next functions to be invoked after the function with the given callbackId */
+  nextFunctions(callbackId: string): Function[] {
+    const invokerFn = this.findFunction(callbackId); // callbackId is the name of the function
     if (!invokerFn) {
       throw new Error(`Function with name "${callbackId}" not found`);
     }
-    if (invokerFn.action !== "slack/openModal") {
+
+    // For now, only "inc/createIncident" functions can invoke other functions
+    if (invokerFn.action !== "inc/createIncident") {
       throw new Error(
-        `Function with name "${callbackId}" is not a slack/openModal function. Only slack/openModal functions can invoke other functions.`,
+        `Function with name "${callbackId}" is not a "inc/createIncident" function. Only "inc/createIncident" functions can invoke other functions.`,
       );
     }
 
     return invokerFn.invoke
-      .map((x) => this.fn(x))
+      .map((x) => this.findFunction(x))
       .filter((x) => x !== undefined)
       .map((x) => x!);
   }
@@ -85,8 +89,9 @@ export class Config {
     };
 
     const fillFieldRefInFn = (fn: Function) => {
-      if (fn.action === "slack/openModal") {
-        fn.elements
+      // For now, only "inc/createIncident" functions have fillField elements
+      if (fn.action === "inc/createIncident") {
+        fn.modal.elements
           .filter((element) => element.type === "fillField")
           .map((element) => element as FillFieldElement)
           .forEach(validate);

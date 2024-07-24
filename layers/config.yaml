@@ -10,17 +10,15 @@ stdField:
   description:
     name: 概要
     placeholder: 決済システムが500エラー
-  services:
-    name: 影響サービス
+  status:
+    name: ステータス
     items:
-      - code: delivery
-        value: "配送管理"
-      - code: merchandise
-        value: "商品管理"
-      - code: claim
-        value: "請求管理"
-      - code: all
-        value: "全サービス"
+      - code: open
+        value: 未対応
+      - code: inProgress
+        value: 対応中
+      - code: resolved
+        value: 解決済
   level:
     name: インシデントレベル
     items:
@@ -35,48 +33,57 @@ stdField:
       - code: sev5
         value: ":eyes: SEV5"
 customField:
-  triage:
-    type: enum
-    name: 温度感
-    multiple: false
+  services:
+    type: multiSelect
+    name: 影響サービス
     items:
-      - code: open
-        value: 未対応
-      - code: inProgress
-        value: 対応中
-      - code: resolved
-        value: 解決済
+      - code: delivery
+        value: "配送管理"
+      - code: merchandise
+        value: "商品管理"
+      - code: claim
+        value: "請求管理"
+  triage:
+    type: singleSelect
+    name: 温度感
+    items:
+      - code: emergency
+        value: ":fire: サービスに影響が出ており、緊急の対応が必要"
+      - code: investigate
+        value: ":male-detective: サービスへの影響は不明で、調査が必要"
+      - code: maintain
+        value: ":relieved: サービスへの影響はなし（予防措置をとる）"
 flow:
   trigger:
     type: slack/command
-    invoke: openInitialForm
+    invoke: reportIncident
   function:
-    - name: openInitialForm
-      action: slack/openModal
-      title: インシデントの疑いを報告
-      elements:
-        - type: header
-          text: インシデントの疑いを報告
-        - type: text
-          text: インシデントの疑いを報告します。
-        - type: fillField
-          field: std.services
-          label: 影響サービス
-        - type: fillField
-          field: custom.triage
-          label: 温度感
-        - type: fillField
-          field: std.description
-          label: 発生している事象
-        - type: note
-          text: 今わかっていることをざっくりで構いません
-      submit:
-        label: 報告
-      cancel:
-        label: キャンセル
+    - name: reportIncident
+      action: inc/createIncident
+      modal:
+        title: インシデントの疑いを報告
+        elements:
+          - type: header
+            text: インシデントの疑いを報告
+          - type: text
+            text: インシデントの疑いを報告します。
+          - type: fillField
+            field: custom.services
+            label: 影響サービス
+          - type: fillField
+            field: custom.triage
+            label: 温度感
+          - type: fillField
+            field: std.description
+            label: 発生している事象
+          - type: note
+            text: 今わかっていることをざっくりで構いません
+        submit:
+          label: 報告
+        cancel:
+          label: キャンセル
       invoke:
         - initialReport
-        - createIncident
         # - createWarRoomChannel
         # - invitePeoples
         # - setPingCycle

@@ -4,7 +4,11 @@
     "specifiers": {
       "jsr:@std/assert": "jsr:@std/assert@0.226.0",
       "jsr:@std/assert@^0.226.0": "jsr:@std/assert@0.226.0",
+      "jsr:@std/bytes@^1.0.1-rc.3": "jsr:@std/bytes@1.0.2",
+      "jsr:@std/crypto@^1.0.0-rc.1": "jsr:@std/crypto@1.0.1",
+      "jsr:@std/encoding": "jsr:@std/encoding@0.224.3",
       "jsr:@std/internal@^1.0.0": "jsr:@std/internal@1.0.1",
+      "jsr:@std/uuid": "jsr:@std/uuid@1.0.0",
       "jsr:@std/yaml": "jsr:@std/yaml@0.224.1",
       "npm:@aws-sdk/client-sqs": "npm:@aws-sdk/client-sqs@3.609.0_@aws-sdk+client-sts@3.609.0__@aws-sdk+client-sso-oidc@3.609.0___@aws-sdk+client-sts@3.609.0_@aws-sdk+client-sso-oidc@3.609.0__@aws-sdk+client-sts@3.609.0___@aws-sdk+client-sso-oidc@3.609.0____@aws-sdk+client-sts@3.609.0__@aws-sdk+client-sts@3.609.0___@aws-sdk+client-sso-oidc@3.609.0____@aws-sdk+client-sts@3.609.0_____@aws-sdk+client-sso-oidc@3.609.0___@aws-sdk+client-sso-oidc@3.609.0",
       "npm:@slack/bolt": "npm:@slack/bolt@3.18.0",
@@ -20,8 +24,24 @@
           "jsr:@std/internal@^1.0.0"
         ]
       },
+      "@std/bytes@1.0.2": {
+        "integrity": "fbdee322bbd8c599a6af186a1603b3355e59a5fb1baa139f8f4c3c9a1b3e3d57"
+      },
+      "@std/crypto@1.0.1": {
+        "integrity": "5d60e6412b2ce61193e2bb622cba02d34890b3d8c4eef3312e499a77329a6f94"
+      },
+      "@std/encoding@0.224.3": {
+        "integrity": "5e861b6d81be5359fad4155e591acf17c0207b595112d1840998bb9f476dbdaf"
+      },
       "@std/internal@1.0.1": {
         "integrity": "6f8c7544d06a11dd256c8d6ba54b11ed870aac6c5aeafff499892662c57673e6"
+      },
+      "@std/uuid@1.0.0": {
+        "integrity": "32595ccd31756728c9110cb98e25000e72b8d63151b7211034ea081761ed2104",
+        "dependencies": [
+          "jsr:@std/bytes@^1.0.1-rc.3",
+          "jsr:@std/crypto@^1.0.0-rc.1"
+        ]
       },
       "@std/yaml@0.224.1": {
         "integrity": "cbb444acccce7ea34b9ef6678bff84c18eba89b790e52dd098def8dae313f0b2"

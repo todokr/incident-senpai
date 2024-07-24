@@ -2,11 +2,12 @@ import {
   ChatPostEphemeralArguments,
   ChatPostMessageArguments,
 } from "npm:@slack/web-api";
+import { Incident } from "./model/incident.ts";
 
 export type AsyncTask =
   | SlackPostTask
   | SlackEphemeralPostTask
-  | DatastoreCreateIncidentTask;
+  | CreateIncidentTask
 // deno-lint-ignore no-explicit-any
 export function isAsyncTask(task: any): task is AsyncTask {
   return "action" in task && "payload" in task;
@@ -22,14 +23,7 @@ type SlackEphemeralPostTask = {
   payload: ChatPostEphemeralArguments;
 };
 
-type DatastoreCreateIncidentTask = {
-  action: "datastore/createIncident";
-  payload: {
-    summary: string;
-    reporter: {
-      id: string;
-      name: string;
-    };
-    metadata: Record<string, unknown>;
-  };
+type CreateIncidentTask = {
+  action: "inc/createIncident";
+  payload: Incident;
 };

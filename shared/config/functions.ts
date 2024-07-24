@@ -1,20 +1,22 @@
 import { z } from "npm:zod";
 import { ModalElement, PostElement } from "../model/element.ts";
 
-const SlackOpenModalFunction = z.object({
+const CreateIncidentFunction = z.object({
   name: z.string(),
-  action: z.literal("slack/openModal"),
-  title: z.string(),
-  elements: z.array(ModalElement),
-  submit: z.object({
+  action: z.literal("inc/createIncident"),
+  modal: z.object({
+    title: z.string(),
+    elements: z.array(ModalElement),
+      submit: z.object({
     label: z.string().optional(),
+    }),
+    cancel: z.object({
+      label: z.string(),
+    }).optional(),
   }),
-  cancel: z.object({
-    label: z.string(),
-  }).optional(),
   invoke: z.array(z.string()),
 });
-export type SlackOpenModalFunction = z.infer<typeof SlackOpenModalFunction>;
+export type CreateIncidentFunction = z.infer<typeof CreateIncidentFunction>;
 
 const SlackPostFunction = z.object({
   name: z.string(),
@@ -30,7 +32,7 @@ const DatastoreCreateIncidentFunction = z.object({
 });
 
 const Function = z.discriminatedUnion("action", [
-  SlackOpenModalFunction,
+  CreateIncidentFunction,
   SlackPostFunction,
   DatastoreCreateIncidentFunction,
 ]);
@@ -47,13 +49,13 @@ export const Functions = z.array(Function).refine((fns) => {
   return true;
 }, { message: "function names must be unique" })
   .refine((fns) => {
-    const notFound = fns.flatMap((fn) => {
-      const invokes = fn.action === "slack/openModal" ? fn.invoke : [];
+    const afterCreateIncidentInvokeNotFound = fns.flatMap((fn) => {
+      const invokes = fn.action === "inc/createIncident" ? fn.invoke : [];
       return invokes
         .filter((invoke) => !fns.some((x) => x.name === invoke))
         .map((invoke) => ({ name: fn.name, invoke }));
     });
-    return notFound.length === 0;
+    return afterCreateIncidentInvokeNotFound.length === 0;
   }, {
-    message: "Function specified in invoke not found",
+    message: "Function specified in `invoke` of `inc/createIncident` not found",
   });

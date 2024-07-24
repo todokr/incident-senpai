@@ -11,6 +11,7 @@ export const Flow = z.object({
   trigger: Trigger,
   function: Functions,
 }).refine((flow) => {
+  // Check if the function specified in "flow.trigger.invoke" exists
   const fNames = flow.function.map((f) => f.name);
   return fNames.includes(flow.trigger.invoke);
 }, { message: 'Function specified in "flow.trigger.invoke" not found' });
