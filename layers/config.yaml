@@ -60,7 +60,7 @@ flow:
         - type: text
           text: インシデントの疑いを報告します。
         - type: fillField
-          field: std.service
+          field: std.services
           label: 影響サービス
         - type: fillField
           field: custom.triage
